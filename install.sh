@@ -5,17 +5,23 @@ set -euo pipefail
 function link() {
     local src="$(realpath "$1")"
     local dest_dir="$(realpath "$2")"
-    local dest_name="$(basename "$1")"
+    local dest_name
+    if [[ $# -ge 3 ]]; then
+        dest_name="$3"
+    else
+        dest_name="$(basename "$1")"
+    fi
 
-    if [[ -e "$dest_dir/$dest_name" ]]; then
-        printf "$dest_dir/$dest_name already exists. Override [y/n]?: "
+    local dest_path="$dest_dir/$dest_name"
+    if [[ -e "$dest_path" ]]; then
+        printf "$dest_path already exists. Override [y/n]?: "
         read -r -n 1 confirm
         printf "\n"
         if [[ $confirm == "y" ]]; then
-            ln -sf "$src" "$dest_dir"
+            ln -sfT "$src" "$dest_path"
         fi
     else
-        ln -s "$src" "$dest_dir"
+        ln -sT "$src" "$dest_path"
     fi
 }
 
@@ -32,7 +38,7 @@ for dir in "${DIRS[@]}"; do
     fi
 done
 
-link "$SCRIPT_DIR/.bashrc" "$HOME"
-link "$SCRIPT_DIR/.bash_aliases" "$HOME"
+link "$SCRIPT_DIR/bashrc" "$HOME" ".bashrc"
+link "$SCRIPT_DIR/bash_aliases" "$HOME" ".bash_aliases"
 
 popd 1>/dev/null
