@@ -6,14 +6,21 @@ function link() {
     local src="$(realpath "$1")"
     local dest_dir="$(realpath "$2")"
     local dest_name
+
+    if ! [[ -e "$src" ]]; then
+        return 0
+    fi
+
     if [[ $# -ge 3 ]]; then
         dest_name="$3"
+        shift 3
     else
         dest_name="$(basename "$1")"
+        shift 2
     fi
 
     local dest_path="$dest_dir/$dest_name"
-    if [[ -e "$dest_path" ]]; then
+    if [[ -e "$dest_path" || -L "$dest_path" ]]; then
         printf "$dest_path already exists. Override [y/n]?: "
         read -r -n 1 confirm
         printf "\n"
@@ -40,5 +47,8 @@ done
 
 link "$SCRIPT_DIR/bashrc" "$HOME" ".bashrc"
 link "$SCRIPT_DIR/bash_aliases" "$HOME" ".bash_aliases"
+
+link "$SCRIPT_DIR/localrc" "$HOME/.config" ".localrc"
+link "$SCRIPT_DIR/local_aliases" "$HOME/.config" ".local_aliases"
 
 popd 1>/dev/null

@@ -136,3 +136,5 @@ EDITOR="nvim"
 
 PATH="$HOME/bin/:$HOME/scripts/:$PATH"
 complete -c source
+
+[[ -e "$HOME/.config/.localrc" ]] && source "$HOME/.config/.localrc"

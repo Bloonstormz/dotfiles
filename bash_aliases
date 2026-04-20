@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # perl to remove any trailing new line
 # tee to output copied content to stdout, while still passing args to xclip
 # echo "" to ensure new line
@@ -13,3 +15,5 @@ function gf() {
     done
     wait
 }
+
+[[ -e "$HOME/.config/.local_aliases" ]] && source "$HOME/.config/.local_aliases"
