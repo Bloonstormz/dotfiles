@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # perl to remove any trailing new line
-# tee to output copied content to stdout, while still passing args to xclip
-# echo "" to ensure new line
-alias copy='perl -pe "chomp if eof" | tee >(xclip -selection c) && echo ""'
+# Convert to base 64 for OSC 52 to copy to clipboard. Works over ssh
+alias copy='perl -pe "chomp if eof" | base64 -w 0 | xargs printf "\033]52;c;%s\a"'
 
 alias bs='source ~/.bashrc'
 
