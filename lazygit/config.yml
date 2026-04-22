@@ -1,0 +1,56 @@
+gui:
+  nerdFontsVersion: "3"
+  theme:
+    activeBorderColor:
+      - '#a6e3a1'
+      - bold
+    inactiveBorderColor:
+      - '#a6adc8'
+    optionsTextColor:
+      - '#89b4fa'
+    selectedLineBgColor:
+      - '#313244'
+    cherryPickedCommitBgColor:
+      - '#45475a'
+    cherryPickedCommitFgColor:
+      - '#a6e3a1'
+    unstagedChangesColor:
+      - '#f38ba8'
+    defaultFgColor:
+      - '#cdd6f4'
+    searchingActiveBorderColor:
+      - '#f9e2af'
+
+  authorColors:
+    '*': '#b4befe'
+git:
+  commit:
+    signOff: true
+customCommands:
+  - key: '<c-A>'
+    context: 'commits'
+    description: 'Amend without hooks'
+    command: |
+      set -e
+      STASH_ENTRY=false
+      COMMIT={{.SelectedCommit.Hash}}
+      HEAD="$(git rev-parse HEAD)"
+
+      if [ "$COMMIT" = "$HEAD" ]; then 
+        git commit --amend --no-verify --allow-empty --allow-empty-message --no-edit
+      else
+        if ! [ $(git status | grep "working tree clean") ]; then
+          git stash -k
+          STASH_ENTRY=true
+        fi
+
+        git commit --no-verify --squash "$COMMIT" --no-edit
+        GIT_EDITOR=':' git rebase -i --autosquash ${COMMIT}^
+
+        if [ $STASH_ENTRY = true ]; then
+          git stash pop
+        fi
+      fi
+    output: 'terminal'
+os:
+  copyToClipboardCmd: printf "\033]52;c;$(printf {{text}} | base64 -w 0)\a" > /dev/tty
