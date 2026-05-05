@@ -132,7 +132,8 @@ if [[ -z $RED ]]; then
 fi
 PS1="${GREEN}\u${NORMAL}:${BLUE}\w${NORMAL} > "
 
-EDITOR="nvim"
+export EDITOR="nvim"
+export MANPAGER="nvim +Man!"
 
 PATH="$HOME/bin/:$HOME/scripts/:$PATH"
 complete -c source
