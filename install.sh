@@ -78,3 +78,57 @@ link "$SCRIPT_DIR/localrc" "$HOME/.config" ".localrc"
 link "$SCRIPT_DIR/local_aliases" "$HOME/.config" ".local_aliases"
 
 popd 1>/dev/null
+
+# Install packages
+
+function prompt_install() {
+    local package="$1"
+    local name="${2:-"${package}"}"
+    local confirm
+
+    if command -v "$package" &>/dev/null; then
+        # Already installed
+        return 1
+    fi
+
+    printf "%s not installed. Install [y/n]?: " "$name"
+    read -r -n 1 confirm
+    printf "\n"
+
+    if [[ $confirm == "y" ]]; then
+        return 0
+    fi
+    return 1
+}
+function python_venv() {
+    if [[ -d "${SCRIPT_DIR}/.venv" ]]; then
+        return 0
+    fi
+    python3 -m virtualenv .venv
+    source "${SCRIPT_DIR}/.venv/bin/activate"
+}
+
+# For python packages, if there already exists a virtualenv, then source it so that prompt_install can discover packages
+if [[ -d "${SCRIPT_DIR}/.venv" ]]; then
+    source "${SCRIPT_DIR}/.venv/bin/activate"
+fi
+
+if prompt_install "node"; then
+    # Taken from node.js.org/en/download
+
+    # Download and install nvm:
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+
+    # Hide warnings about not being able to evaluate $HOME source
+    # shellcheck disable=SC1091
+    \. "$HOME/.nvm/nvm.sh" # in lieu of restarting the shell
+
+    # Download and install Node.js:
+    nvm install 24
+fi
+
+if prompt_install "pylint" "Pylint LSP"; then
+    python_venv
+
+    pip3 install pylint==4.05
+fi
