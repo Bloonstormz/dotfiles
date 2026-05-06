@@ -8,3 +8,15 @@ opt.shiftwidth = 4
 opt.tabstop = 4
 opt.expandtab = false
 opt.listchars = "tab:> ,lead:·,trail:-,nbsp:+"
+
+local base_chars = {
+  horiz = "━",
+  horizup = "┻",
+  horizdown = "┳",
+  vert = "┃",
+  vertleft = "┫",
+  vertright = "┣",
+  verthoriz = "╋",
+}
+
+opt.fillchars:append(base_chars)
