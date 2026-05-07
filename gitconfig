@@ -1,0 +1,17 @@
+[checkout]
+	defaultRemote = internal
+[color]
+	ui = auto
+[core]
+	editor = nvim
+[alias]
+	cs = commit -s
+	dt = difftool -y
+[push]
+    autoSetupRemote = true
+[commit]
+    signoff = true
+[diff]
+	tool = nvim_difftool
+[difftool "nvim_difftool"]
+	cmd = nvim -R -d $LOCAL $REMOTE

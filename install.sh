@@ -77,6 +77,8 @@ link "$SCRIPT_DIR/bash_aliases" "$HOME" ".bash_aliases"
 link "$SCRIPT_DIR/localrc" "$HOME/.config" ".localrc"
 link "$SCRIPT_DIR/local_aliases" "$HOME/.config" ".local_aliases"
 
+link "$SCRIPT_DIR/gitconfig" "$HOME" ".gitconfig"
+
 popd 1>/dev/null
 
 # Install packages
