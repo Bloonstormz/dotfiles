@@ -10,6 +10,7 @@ alias gitpb="git branch -vv | awk '\$3 \$4 ~ /:gone]$/ { print \$1 }' | xargs -n
 alias sd='shutdown -P 0'
 alias g='git'
 alias gl='git log --oneline'
+alias gc='git checkout'
 alias gitl='gl'
 alias lg='lazygit'
 
