@@ -17,5 +17,6 @@ vim.api.nvim_create_autocmd("User", {
   pattern = "VeryLazy",
   callback = function()
     pcall(require, "config.wsl")
+    pcall(require, "config.local")
   end,
 })
