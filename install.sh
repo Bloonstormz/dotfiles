@@ -106,6 +106,9 @@ function prompt_install() {
     fi
     return 1
 }
+function mason_install() {
+    nvim -c "MasonInstall $1" -c "qall"
+}
 function python_venv() {
     if [[ -d "${SCRIPT_DIR}/.venv" ]]; then
         return 0
@@ -118,6 +121,10 @@ function python_venv() {
 if [[ -d "${SCRIPT_DIR}/.venv" ]]; then
     source "${SCRIPT_DIR}/.venv/bin/activate"
 fi
+
+export PATH="$PATH:${XDG_DATA_HOME:-"$HOME/.local/share/nvim/mason/bin/"}"
+
+set +e # Allow installation failures
 
 if prompt_install "node"; then
     # Taken from node.js.org/en/download
@@ -137,4 +144,16 @@ if prompt_install "ruff" "Ruff LSP"; then
     python_venv
 
     pip3 install ruff==0.15.13
+fi
+
+if prompt_install "pyright" "Pyright LSP"; then
+    mason_install "pyright"
+fi
+
+if prompt_install "clangd" "Clangd"; then
+    mason_install "clangd"
+fi
+
+if prompt_install "bash-language-server" "Bash Language Server"; then
+    npm install -g bash-language-server@5.6.0
 fi
