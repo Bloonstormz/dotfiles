@@ -1,10 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 # perl to remove any trailing new line
 # Convert to base 64 for OSC 52 to copy to clipboard. Works over ssh
 alias copy='perl -pe "chomp if eof" | base64 -w 0 | xargs printf "\033]52;c;%s\a"'
-
-alias bs='source ~/.bashrc'
 
 alias gitpb="git branch -vv | awk '\$3 \$4 ~ /:gone]$/ { print \$1 }' | xargs -n 1 git branch -D" # Remove branches that have been deleted on upstream
 alias sd='shutdown -P 0'
@@ -22,7 +20,7 @@ alias gitrr='grr'
 alias gr='git commit --amend'
 alias gitr='gr'
 
-function gf() {
+gf() {
     local remote
     for remote in $(git remote); do
         git fetch "$remote" &
@@ -31,10 +29,18 @@ function gf() {
 }
 
 # C define search
-function rgd() {
+rgd() {
     local search_term="$1"
     shift
     rg "#define\s+$search_term" "$@"
+}
+
+re_source() {
+    if [ -n "$ZSH_VERSION" ]; then
+        source ~/.zshrc
+    elif [ -n "$BASH_VERSION" ]; then
+        source ~/.bashrc
+    fi
 }
 
 [[ -e "$HOME/.config/.local_aliases" ]] && source "$HOME/.config/.local_aliases"
