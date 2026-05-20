@@ -74,8 +74,12 @@ done
 link "$SCRIPT_DIR/bashrc" "$HOME" ".bashrc"
 link "$SCRIPT_DIR/bash_aliases" "$HOME" ".bash_aliases"
 
+link "$SCRIPT_DIR/zshrc" "$HOME" ".zshrc"
+
 link "$SCRIPT_DIR/localrc" "$HOME/.config" ".localrc"
 link "$SCRIPT_DIR/local_aliases" "$HOME/.config" ".local_aliases"
+
+link "$SCRIPT_DIR/sh_profile" "$HOME/.config" ".profile"
 
 link "$SCRIPT_DIR/gitconfig" "$HOME" ".gitconfig"
 
