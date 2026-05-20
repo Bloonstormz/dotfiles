@@ -133,8 +133,8 @@ if prompt_install "node"; then
     nvm install 24
 fi
 
-if prompt_install "pylint" "Pylint LSP"; then
+if prompt_install "ruff" "Ruff LSP"; then
     python_venv
 
-    pip3 install pylint==4.05
+    pip3 install ruff==0.15.13
 fi
