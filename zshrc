@@ -18,6 +18,8 @@ plugins=(
     thefuck
 )
 
+LESS="-R -F"
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
