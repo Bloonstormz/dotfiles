@@ -72,7 +72,7 @@ for dir in "${DIRS[@]}"; do
 done
 
 link "$SCRIPT_DIR/bashrc" "$HOME" ".bashrc"
-link "$SCRIPT_DIR/bash_aliases" "$HOME" ".bash_aliases"
+link "$SCRIPT_DIR/sh_aliases" "$HOME/.config" ".sh_aliases"
 
 link "$SCRIPT_DIR/zshrc" "$HOME" ".zshrc"
 

@@ -1,4 +1,7 @@
 #!/bin/zsh
+# Add bash compatibility for completions
+autoload -Uz +X bashcompinit && bashcompinit
+
 source ~/.config/.profile || return
 
 # Path to your Oh My Zsh installation.
@@ -18,7 +21,7 @@ plugins=(
     thefuck
 )
 
-LESS="-R -F"
+export LESS="-R -F"
 
 source $ZSH/oh-my-zsh.sh
 
@@ -27,9 +30,6 @@ source $ZSH/oh-my-zsh.sh
 export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
 
 HISTSIZE=1000
-
-# Add bash compatibility for completions
-autoload -Uz +X bashcompinit && bashcompinit
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -57,10 +57,6 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

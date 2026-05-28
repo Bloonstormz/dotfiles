@@ -12,3 +12,7 @@ export EDITOR="nvim"
 export MANPAGER="nvim +Man!"
 
 PATH="$HOME/bin/:$HOME/scripts/:$PATH"
+
+if [ -e "$HOME/.config/.sh_aliases" ]; then
+	. "$HOME/.config/.sh_aliases"
+fi
