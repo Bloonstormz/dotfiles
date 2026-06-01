@@ -29,6 +29,8 @@ source $ZSH/oh-my-zsh.sh
 
 export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
 
+alias fk='fuck'
+
 HISTSIZE=1000
 
 # enable color support of ls and also add handy aliases
