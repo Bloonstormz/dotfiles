@@ -20,6 +20,3 @@ local base_chars = {
 }
 
 opt.fillchars:append(base_chars)
-
-vim.lsp.enable("bashls")
-vim.lsp.enable("ruff")
