@@ -1,6 +1,7 @@
 #!/bin/zsh
 # Add bash compatibility for completions
-autoload -Uz +X bashcompinit && bashcompinit
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
 
 source ~/.config/.profile || return
 
