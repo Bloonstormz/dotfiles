@@ -3,4 +3,5 @@
 -- Add any additional keymaps here
 
 local keymap = vim.keymap
-keymap.set("i", "<C-BS>", "<C-W>")
+-- Ctrl+H is the same control character as Ctrl+Backspace
+keymap.set("i", "<C-H>", "<C-W>")
