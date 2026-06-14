@@ -2,6 +2,19 @@
 
 set -euo pipefail
 
+ALLOW_SUDO=false
+
+while [[ $# -gt 0 ]]; do
+    flag="$1"
+    shift
+
+    case "$flag" in
+    -s | --sudo)
+        ALLOW_SUDO=true
+        ;;
+    esac
+done
+
 # If the path provided is a relative path, pre-pend PWD to it else, do nothing
 # This is to gets an absolute path without resolving symlinks unlike `realpath`
 function fake_realpath() {
@@ -62,6 +75,8 @@ function confirm_link() {
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
+mkdir -p "$HOME/.config"
+
 pushd $SCRIPT_DIR 1>/dev/null
 
 # Get all directories that aren't hidden
@@ -87,25 +102,50 @@ popd 1>/dev/null
 
 # Install packages
 
+function check() {
+    for package in "$@"; do
+        command -v "$package" &>/dev/null || return 1
+    done
+    return 0
+}
+function prompt() {
+    printf "%s [y/n]?: " "$1"
+    read -r -n 1 confirm
+
+    [[ $confirm == "\n" ]] || printf "\n"
+
+    [[ $confirm == "y" ]] && return 0
+    return 1
+}
 function prompt_install() {
     local package="$1"
     local name="${2:-"${package}"}"
     local confirm
 
-    if command -v "$package" &>/dev/null; then
+    if check "$package"; then
         # Already installed
         return 1
     fi
 
-    printf "%s not installed. Install [y/n]?: " "$name"
-    read -r -n 1 confirm
-    printf "\n"
+    prompt "$name not installed. Install"
+}
 
-    if [[ $confirm == "y" ]]; then
-        return 0
+function sudo_access() {
+    if [[ "$ALLOW_SUDO" == true ]]; then
+        command -v sudo >/dev/null && return 0
+
+        if {
+            LANG= sudo -n -v 2>&1 || true
+        } | grep -q "may not run sudo"; then
+            return 0
+        fi
+        ALLOW_SUDO=false # No need to check for sudo access anymore
     fi
+
+    echo "Sudo access required. Aborting..." >&2
     return 1
 }
+
 function mason_install() {
     nvim -c "MasonInstall $1" -c "qall"
 }
@@ -121,6 +161,9 @@ function python_venv() {
 if [[ -d "${SCRIPT_DIR}/.venv" ]]; then
     source "${SCRIPT_DIR}/.venv/bin/activate"
 fi
+
+DOWNLOAD_DIR="$SCRIPT_DIR/downloads"
+mkdir -p "$DOWNLOAD_DIR"
 
 export PATH="$PATH:${XDG_DATA_HOME:-"$HOME/.local/share/nvim/mason/bin/"}"
 
@@ -140,6 +183,46 @@ if prompt_install "node"; then
     nvm install 24
 fi
 
+
+
+if prompt_install "zsh"; then
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    (
+        set -e
+        wget -O zsh.tar.xz https://www.zsh.org/pub/zsh-5.9.1.tar.xz
+        trap "rm zsh.tar.xz" EXIT
+
+        mkdir -p ./zsh
+        tar -xf zsh.tar.xz -C ./zsh --strip-components=1
+        pushd "./zsh" >/dev/null
+
+        ./configure --prefix="$HOME"
+        make
+        make install
+
+        popd >/dev/null
+
+        # Install oh-my-zsh
+        curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh -s -- --keep-zshrc
+
+        if prompt "Make zsh the default shell"; then
+            ZSH="$(command -v zsh)"
+            if ! grep -q "$ZSH" /etc/shells; then
+                # WARNING: If /etc/shells doesn't exist yet, this could prevent others from using their default login shell (probably bash)
+                echo "zsh not in /etc/shells. Updating"
+                if ! sudo_access; then
+                    echo "Sudo Access required. Aborting..."
+                fi
+                echo "$ZSH" | sudo tee -a /etc/shells
+            fi
+            chsh -s "$ZSH"
+        fi
+    )
+    popd >/dev/null
+fi
+
+# LSPs
+
 if prompt_install "ruff" "Ruff LSP"; then
     python_venv
 
@@ -154,6 +237,8 @@ if prompt_install "clangd" "Clangd"; then
     mason_install "clangd"
 fi
 
-if prompt_install "bash-language-server" "Bash Language Server"; then
-    npm install -g bash-language-server@5.6.0
+if check npm; then
+    if prompt_install "bash-language-server" "Bash Language Server"; then
+        npm install -g bash-language-server@5.6.0
+    fi
 fi
