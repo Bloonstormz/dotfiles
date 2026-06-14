@@ -259,6 +259,23 @@ if prompt_install "lazygit"; then
     popd >/dev/null
 fi
 
+if check "cargo" && prompt_install "rg" "ripgrep"; then
+    # Build ripgrep manually as PCRE2 support is not included in prebuilt binaries
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    (
+        set -e
+        git clone --branch 15.1.0 -- https://github.com/BurntSushi/ripgrep ripgrep_source
+        trap "rm -rf ripgrep_source" EXIT
+        cd ripgrep_source
+        cargo build --release --features 'pcre2'
+        cd ..
+
+        mv ./ripgrep_source/target/release/rg .
+        ln -sf "$(realpath ./rg)" "$HOME/bin/rg"
+    )
+    popd >/dev/null
+fi
+
 # LSPs
 
 if prompt_install "ruff" "Ruff LSP"; then
