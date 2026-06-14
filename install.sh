@@ -244,6 +244,21 @@ if prompt_install "zsh"; then
     popd >/dev/null
 fi
 
+if prompt_install "lazygit"; then
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    (
+        set -e
+        wget -O lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/download/v0.62.2/lazygit_0.62.2_linux_x86_64.tar.gz
+        trap "rm lazygit.tar.gz" EXIT
+
+        mkdir -p ./lazygit
+        tar -xzf lazygit.tar.gz -C ./lazygit
+        ln -sf "$(realpath ./lazygit/lazygit)" "$HOME/bin/lazygit"
+    )
+
+    popd >/dev/null
+fi
+
 # LSPs
 
 if prompt_install "ruff" "Ruff LSP"; then

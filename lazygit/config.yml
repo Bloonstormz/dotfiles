@@ -27,7 +27,7 @@ git:
   commit:
     signOff: true
 customCommands:
-  - key: '<c-A>'
+  - key: '<ctrl+shift+a>'
     context: 'commits'
     description: 'Amend without hooks'
     command: |
