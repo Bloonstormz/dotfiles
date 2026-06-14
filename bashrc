@@ -85,4 +85,13 @@ complete -c source
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+
+if [[ -d "$HOME/.config/bash_comp" ]]; then
+    mapfile -t BASH_COMPS < <(ls "$HOME/.config/bash_comp")
+    for file in "${BASH_COMPS[@]}"; do
+        source "$HOME/.config/bash_comp/$file"
+    done
+    unset BASH_COMPS >/dev/null
+fi
+
 true

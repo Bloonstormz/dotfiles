@@ -76,6 +76,8 @@ function confirm_link() {
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 mkdir -p "$HOME/.config"
+mkdir -p "$HOME/.config/bash_comp"
+mkdir -p "$HOME/.config/zsh_comp"
 
 pushd $SCRIPT_DIR 1>/dev/null
 
@@ -272,6 +274,24 @@ if check "cargo" && prompt_install "rg" "ripgrep"; then
 
         mv ./ripgrep_source/target/release/rg .
         ln -sf "$(realpath ./rg)" "$HOME/bin/rg"
+    )
+    popd >/dev/null
+fi
+
+if prompt_install "fd"; then
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    (
+        set -e
+        wget -O fd.tar.gz https://github.com/sharkdp/fd/releases/download/v10.4.2/fd-v10.4.2-x86_64-unknown-linux-gnu.tar.gz
+        trap "rm fd.tar.gz" EXIT
+
+        mkdir -p ./fd_out
+        tar -xzf ./fd.tar.gz -C ./fd_out --strip-components=1
+        mv ./fd_out/fd .
+        mv ./fd_out/autocomplete/fd.bash "$HOME/.config/bash_comp/"
+        mv ./fd_out/autocomplete/_fd "$HOME/.config/zsh_comp/"
+        ln -sf "$(realpath ./fd)" "$HOME/bin/fd"
+        rm -rf ./fd_out
     )
     popd >/dev/null
 fi
