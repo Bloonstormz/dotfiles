@@ -16,3 +16,5 @@ PATH="$HOME/bin/:$HOME/scripts/:$PATH"
 if [ -e "$HOME/.config/.sh_aliases" ]; then
 	. "$HOME/.config/.sh_aliases"
 fi
+
+[ -e "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"

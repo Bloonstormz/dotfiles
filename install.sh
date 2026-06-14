@@ -183,7 +183,30 @@ if prompt_install "node"; then
     nvm install 24
 fi
 
+if prompt_install "cargo" "Rust"; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path
+    . "$HOME/.cargo/env"
+fi
 
+if prompt_install "nvim" "Neovim"; then
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    (
+        set -e
+        wget -O nvim.tar.gz https://github.com/neovim/neovim/releases/download/v0.12.3/nvim-linux-x86_64.tar.gz
+        trap "rm nvim.tar.gz" EXIT
+
+        mkdir -p ./nvim
+        tar -xzf nvim.tar.gz -C ./nvim --strip-components=1
+        ln -sf "$(realpath ./nvim/bin/nvim)" "$HOME/bin/nvim"
+    )
+    popd >/dev/null
+fi
+
+if check nvim cargo; then
+    if prompt_install "tree-sitter"; then
+        cargo install --locked tree-sitter-cli
+    fi
+fi
 
 if prompt_install "zsh"; then
     pushd "$DOWNLOAD_DIR" >/dev/null
