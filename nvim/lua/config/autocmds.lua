@@ -12,6 +12,7 @@ vim.api.nvim_create_autocmd({ "VimLeave" }, {
   command = "set guicursor=a:ver20",
 })
 
--- Load environment-specific extensions when available
+-- Load additional configs when available
+pcall(require, "config.cmds")
 pcall(require, "config.wsl")
 pcall(require, "config.local")
