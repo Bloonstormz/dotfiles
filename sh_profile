@@ -18,3 +18,4 @@ if [ -e "$HOME/.config/.sh_aliases" ]; then
 fi
 
 [ -e "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+true
