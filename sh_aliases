@@ -22,13 +22,20 @@ alias gitrr='grr'
 alias gr='git commit --amend'
 alias gitr='gr'
 
-{ command -v gf && { unalias gf || unset gf; } } >/dev/null 2>&1
-gf() {
-    local remote
-    for remote in $(git remote); do
-        git fetch "$remote" &
-    done
-    wait
+{ command -v gf && { unalias gf || unset gf; }; } >/dev/null 2>&1
+alias gf='git fetch --all'
+
+_get_shell() {
+    if [ -n "$ZSH_VERSION" ]; then
+        echo "zsh"
+    elif [ -n "$BASH_VERSION" ]; then
+        echo "bash"
+    else
+        echo "sh"
+    fi
+}
+_command_exists() {
+    command -v "$1" >/dev/null 2>&1
 }
 
 # C define search
@@ -39,11 +46,11 @@ rgd() {
 }
 
 re_source() {
-    if [ -n "$ZSH_VERSION" ]; then
-        . ~/.zshrc
-    elif [ -n "$BASH_VERSION" ]; then
-        . ~/.bashrc
-    fi
+    . ~/$(_get_shell)rc
 }
+
+if _command_exists pay-respects; then
+    eval "$(pay-respects $(_get_shell) --alias)"
+fi
 
 [ -e "$HOME/.config/.local_aliases" ] && . "$HOME/.config/.local_aliases"

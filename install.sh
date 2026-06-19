@@ -283,6 +283,12 @@ if check "cargo" && prompt_install "rg" "ripgrep"; then
     popd >/dev/null
 fi
 
+if check "cargo" && prompt_install "pay-respects"; then
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    cargo install pay-respects
+    popd >/dev/null
+fi
+
 if prompt_install "fd"; then
     pushd "$DOWNLOAD_DIR" >/dev/null
     (

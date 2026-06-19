@@ -19,7 +19,6 @@ COMPLETION_WAITING_DOTS="true"
 plugins=(
     web-search
     repo
-    thefuck
 )
 
 export LESS="-R -F"
@@ -29,8 +28,6 @@ source $ZSH/oh-my-zsh.sh
 # User configuration
 
 export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
-
-alias fk='fuck'
 
 HISTSIZE=1000
 
