@@ -149,7 +149,12 @@ function sudo_access() {
 }
 
 function mason_install() {
-    nvim -c "MasonInstall $1" -c "qall"
+    if ! check "nvim"; then
+        echo "Neovim is required to install $1" >&2
+        return 1
+    fi
+    nvim --headless -c "lua require('mason')" -c "MasonInstall $1" -c "qall"
+    echo
 }
 function python_venv() {
     if [[ -d "${SCRIPT_DIR}/.venv" ]]; then
