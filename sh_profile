@@ -10,6 +10,9 @@ esac
 
 export EDITOR="nvim"
 export MANPAGER="nvim +Man!"
+export MANWIDTH="999"
+# man pre-formats the man page using groff causing hard-wraps making the
+# man page display incorrectly if the window size changes
 
 PATH="$HOME/.cargo/bin/:$HOME/bin/:$HOME/scripts/:$PATH"
 
