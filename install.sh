@@ -104,6 +104,8 @@ popd 1>/dev/null
 
 # Install packages
 
+mkdir -p "$HOME/bin"
+
 function check() {
     for package in "$@"; do
         command -v "$package" &>/dev/null || return 1
@@ -156,10 +158,34 @@ function mason_install() {
     nvim --headless -c "lua require('mason')" -c "MasonInstall $1" -c "qall"
     echo
 }
+ALLOW_PYTHON_VENV=true
 function python_venv() {
     if [[ -d "${SCRIPT_DIR}/.venv" ]]; then
         return 0
     fi
+    if [[ "$ALLOW_PYTHON_VENV" == false ]]; then
+        return 1
+    fi
+
+    if ! pip3 show virtualenv &>/dev/null; then
+        if prompt_install "non existant" "python module: virtualenv"; then
+            output="$(pip3 install virtualenv 2>&1)"
+            if [[ $? -ne 0 ]]; then
+                if sudo_access; then
+                    sudo apt install python3-virtualenv
+                else
+                    ALLOW_PYTHON_VENV=false
+                    return 1
+                fi
+            else
+                printf "%s\n" "$output" &>2
+            fi
+        else
+            ALLOW_PYTHON_VENV=false
+            return 1
+        fi
+    fi
+
     python3 -m virtualenv .venv
     source "${SCRIPT_DIR}/.venv/bin/activate"
 }
@@ -309,9 +335,7 @@ fi
 
 # LSPs
 
-if prompt_install "ruff" "Ruff LSP"; then
-    python_venv
-
+if python_venv && prompt_install "ruff" "Ruff LSP"; then
     pip3 install ruff==0.15.13
 fi
 
