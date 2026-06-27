@@ -7,12 +7,7 @@
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
-vim.api.nvim_create_autocmd({ "VimLeave" }, {
-  desc = "Reset Cursor to Beam on leave",
-  command = "set guicursor=a:ver20",
-})
-
--- Overwrite lazvyim wrap autocmd for markdown files.
+-- Overwrite lazyvim wrap autocmd for markdown files.
 -- We don't want wrapping as it messes with how markdown tables are displayed
 vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 vim.api.nvim_create_autocmd("FileType", {

@@ -35,7 +35,10 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-# export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
+_reset_to_beam() {
+    printf "\033[6 q"
+}
+precmd_functions+=(_reset_to_beam)
 
 HISTSIZE=1000
 

@@ -76,7 +76,7 @@ fi
 if [[ -z $RED ]]; then
     RED='\[\033[31m\]'
 fi
-PS1="${GREEN}\u${NORMAL}:${BLUE}\w${NORMAL} > "
+PS1="${GREEN}\u${NORMAL}:${BLUE}\w${NORMAL} > \[\033[6 q\]"
 
 complete -c source
 
