@@ -1,4 +1,12 @@
 #!/bin/zsh
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # Add bash compatibility for completions
 autoload -U +X compinit && compinit
 autoload -U +X bashcompinit && bashcompinit
@@ -9,7 +17,7 @@ source ~/.config/.profile || return
 export ZSH="$HOME/.oh-my-zsh"
 
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
 COMPLETION_WAITING_DOTS="true"
 
@@ -27,7 +35,7 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
+# export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
 
 HISTSIZE=1000
 
@@ -63,5 +71,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 fpath+=("$HOME/.config/zsh_comp")
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 true

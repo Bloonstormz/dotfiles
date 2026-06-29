@@ -94,6 +94,7 @@ link "$SCRIPT_DIR/bashrc" "$HOME" ".bashrc"
 link "$SCRIPT_DIR/sh_aliases" "$HOME/.config" ".sh_aliases"
 
 link "$SCRIPT_DIR/zshrc" "$HOME" ".zshrc"
+link "$SCRIPT_DIR/p10k.zsh" "$HOME" ".p10k.zsh"
 
 link "$SCRIPT_DIR/localrc" "$HOME/.config" ".localrc"
 link "$SCRIPT_DIR/local_aliases" "$HOME/.config" ".local_aliases"
@@ -261,7 +262,9 @@ if prompt_install "zsh"; then
         popd >/dev/null
 
         # Install oh-my-zsh
-        curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh -s -- --keep-zshrc
+        curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh -s -- --keep-zshrc --unattended
+        # Install powerlevel10k
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 
         if prompt "Make zsh the default shell"; then
             ZSH="$(command -v zsh)"
