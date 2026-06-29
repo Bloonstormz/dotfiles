@@ -20,3 +20,9 @@ local base_chars = {
 }
 
 opt.fillchars:append(base_chars)
+
+if vim.fn.executable("zsh") == 1 then
+  opt.shell = "zsh"
+else
+  opt.shell = "bash"
+end
