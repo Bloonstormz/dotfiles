@@ -263,11 +263,15 @@ if prompt_install "zsh"; then
 
         if prompt "Make zsh the default shell"; then
             ZSH="$(command -v zsh)"
+            if ! [[ -e /etc/shells ]]; then
+                echo "/etc/shells does not exit. Aborting.."
+                exit 1
+            fi
             if ! grep -q "$ZSH" /etc/shells; then
-                # WARNING: If /etc/shells doesn't exist yet, this could prevent others from using their default login shell (probably bash)
                 echo "zsh not in /etc/shells. Updating"
                 if ! sudo_access; then
                     echo "Sudo Access required. Aborting..."
+                    exit 1
                 fi
                 echo "$ZSH" | sudo tee -a /etc/shells
             fi
