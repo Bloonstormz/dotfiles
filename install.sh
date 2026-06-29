@@ -30,8 +30,9 @@ function fake_realpath() {
 }
 
 function link() {
-    local src="$(realpath "$1")"
-    local dest_dir="$(realpath "$2")"
+    local src dest_dir
+    src="$(realpath "$1")"
+    dest_dir="$(realpath "$2")"
     local dest_name
 
     if ! [[ -e "$src" ]]; then
@@ -53,15 +54,16 @@ function link() {
 # 2nd argument: Path of the destination link
 #   Note: Name of the destination file/directory should be included in this argument
 function confirm_link() {
-    local src_path="$(fake_realpath "$1")"
-    local dest_path="$(fake_realpath "$2")"
+    local src_path dest_path
+    src_path="$(fake_realpath "$1")"
+    dest_path="$(fake_realpath "$2")"
     if [[ -e "$dest_path" || -L "$dest_path" ]]; then
 
         if [[ -L "$dest_path" ]] && [[ "$(realpath "$dest_path")" == "$(realpath "$src_path")" ]]; then
             return
         fi
 
-        printf "$dest_path already exists. Override [y/n]?: "
+        printf "%s already exists. Override [y/n]?: " "$dest_path"
         read -r -n 1 confirm
         printf "\n"
         if [[ $confirm == "y" ]]; then
@@ -79,10 +81,10 @@ mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/bash_comp"
 mkdir -p "$HOME/.config/zsh_comp"
 
-pushd $SCRIPT_DIR 1>/dev/null
+pushd "$SCRIPT_DIR" 1>/dev/null
 
 # Get all directories that aren't hidden
-mapfile -t DIRS < <(find -maxdepth 1 -type d -not -name '.*')
+mapfile -t DIRS < <(find . -maxdepth 1 -type d -not -name '.*')
 
 for dir in "${DIRS[@]}"; do
     confirm_link "$dir" "$HOME/.config/$dir"
@@ -139,7 +141,7 @@ function sudo_access() {
         command -v sudo >/dev/null && return 0
 
         if {
-            LANG= sudo -n -v 2>&1 || true
+            LANG='' sudo -n -v 2>&1 || true
         } | grep -q "may not run sudo"; then
             return 0
         fi
@@ -169,8 +171,7 @@ function python_venv() {
 
     if ! pip3 show virtualenv &>/dev/null; then
         if prompt_install "non existant" "python module: virtualenv"; then
-            output="$(pip3 install virtualenv 2>&1)"
-            if [[ $? -ne 0 ]]; then
+            if ! output="$(pip3 install virtualenv 2>&1)"; then
                 if sudo_access; then
                     sudo apt install python3-virtualenv
                 else
@@ -178,7 +179,7 @@ function python_venv() {
                     return 1
                 fi
             else
-                printf "%s\n" "$output" &>2
+                printf "%s\n" "$output" >&2
             fi
         else
             ALLOW_PYTHON_VENV=false
@@ -218,6 +219,7 @@ fi
 
 if prompt_install "cargo" "Rust"; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path
+    # shellcheck disable=SC1091
     . "$HOME/.cargo/env"
 fi
 
