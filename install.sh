@@ -15,6 +15,13 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+
+source "$SCRIPT_DIR/bashrc" || true
+
+BASH_COMP="$HOME/.config/bash_comp"
+ZSH_COMP="$HOME/.config/zsh_comp"
+
 # If the path provided is a relative path, pre-pend PWD to it else, do nothing
 # This is to gets an absolute path without resolving symlinks unlike `realpath`
 function fake_realpath() {
@@ -75,11 +82,10 @@ function confirm_link() {
     fi
 }
 
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-
 mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/bash_comp"
 mkdir -p "$HOME/.config/zsh_comp"
+mkdir -p "$HOME/.config/git"
 
 pushd "$SCRIPT_DIR" 1>/dev/null
 
@@ -151,6 +157,40 @@ function sudo_access() {
 
     echo "Sudo access required. Aborting..." >&2
     return 1
+}
+
+function extract_tar() {
+    local tarball="$1"
+    local out_dir="./tmp.out"
+    local strip=0
+    shift
+    while [[ $# -gt 0 ]]; do
+        local flag="$1"
+        shift
+        case "$flag" in
+        -o | --output)
+            out_dir="$1"
+            shift
+            ;;
+        -s | --strip)
+            if [[ $# -gt 0 ]] && ! [[ "$1" =~ ^- ]]; then
+                strip="$1"
+                shift
+            else
+                strip=1
+            fi
+            ;;
+        esac
+    done
+
+    if [[ $strip -gt 0 ]]; then
+        ADDITIONAL_ARGS="--strip-components=$strip"
+    else
+        ADDITIONAL_ARGS=""
+    fi
+
+    mkdir -p "$out_dir"
+    tar -xf "$tarball" -C "$out_dir" "$ADDITIONAL_ARGS"
 }
 
 function mason_install() {
@@ -231,8 +271,7 @@ if prompt_install "nvim" "Neovim"; then
         wget -O nvim.tar.gz https://github.com/neovim/neovim/releases/download/v0.12.3/nvim-linux-x86_64.tar.gz
         trap "rm nvim.tar.gz" EXIT
 
-        mkdir -p ./nvim
-        tar -xzf nvim.tar.gz -C ./nvim --strip-components=1
+        extract_tar nvim.tar.gz -o ./nvim -s
         ln -sf "$(realpath ./nvim/bin/nvim)" "$HOME/bin/nvim"
     )
     popd >/dev/null
@@ -293,8 +332,7 @@ if prompt_install "lazygit"; then
         wget -O lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/download/v0.62.2/lazygit_0.62.2_linux_x86_64.tar.gz
         trap "rm lazygit.tar.gz" EXIT
 
-        mkdir -p ./lazygit
-        tar -xzf lazygit.tar.gz -C ./lazygit
+        extract_tar lazygit.tar.gz -o ./lazygit
         ln -sf "$(realpath ./lazygit/lazygit)" "$HOME/bin/lazygit"
     )
 
@@ -314,6 +352,8 @@ if check "cargo" && prompt_install "rg" "ripgrep"; then
 
         mv ./ripgrep_source/target/release/rg .
         ln -sf "$(realpath ./rg)" "$HOME/bin/rg"
+        ./rg --generate complete-bash >"$BASH_COMP/_rg"
+        ./rg --generate complete-zsh >"$ZSH_COMP/_rg"
     )
     popd >/dev/null
 fi
@@ -331,13 +371,49 @@ if prompt_install "fd"; then
         wget -O fd.tar.gz https://github.com/sharkdp/fd/releases/download/v10.4.2/fd-v10.4.2-x86_64-unknown-linux-gnu.tar.gz
         trap "rm fd.tar.gz" EXIT
 
-        mkdir -p ./fd_out
-        tar -xzf ./fd.tar.gz -C ./fd_out --strip-components=1
+        extract_tar ./fd.tar.gz -o ./fd_out -s
         mv ./fd_out/fd .
-        mv ./fd_out/autocomplete/fd.bash "$HOME/.config/bash_comp/"
-        mv ./fd_out/autocomplete/_fd "$HOME/.config/zsh_comp/"
+        mv ./fd_out/autocomplete/fd.bash "$BASH_COMP"
+        mv ./fd_out/autocomplete/_fd "$ZSH_COMP"
         ln -sf "$(realpath ./fd)" "$HOME/bin/fd"
         rm -rf ./fd_out
+    )
+    popd >/dev/null
+fi
+
+if prompt_install "bat"; then
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    (
+        set -e
+        wget -O bat.tar.gz https://github.com/sharkdp/bat/releases/download/v0.26.1/bat-v0.26.1-x86_64-unknown-linux-gnu.tar.gz
+        trap "rm bat.tar.gz" EXIT
+
+        extract_tar "bat.tar.gz" -s -o bat
+        ln -sf "$(realpath ./bat/bat)" "$HOME/bin/bat"
+
+        ./bat/bat --config-file
+        ./bat/bat --completion bash >"$ZSH_COMP/_bat"
+        ./bat/bat --completion zsh >"$ZSH_COMP/_bat"
+
+        link "$SCRIPT_DIR/configs/bat.config" "$(bat --config-file)"
+    )
+    popd >/dev/null
+fi
+
+if check "cargo" && prompt_install "delta"; then
+    pushd "$DOWNLOAD_DIR" >/dev/null
+    (
+        set -e
+        cargo install git-delta
+        delta --generate-completion bash >"$BASH_COMP/_delta"
+        delta --generate-completion zsh >"$ZSH_COMP/_delta"
+
+        link "$SCRIPT_DIR/configs/delta.config" "$HOME/.config/git"
+
+        echo "Downloading Catppuccin Themes for Delta"
+        wget -O "$SCRIPT_DIR/configs/catppuccin.gitconfig" https://raw.githubusercontent.com/catppuccin/delta/refs/heads/main/catppuccin.gitconfig
+
+        link "$SCRIPT_DIR/configs/catppuccin.gitconfig" "$HOME/.config/git"
     )
     popd >/dev/null
 fi

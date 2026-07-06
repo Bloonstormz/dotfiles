@@ -1,3 +1,5 @@
+[include]
+	path = ~/.config/git/delta.config
 [checkout]
 	defaultRemote = internal
 [color]
@@ -7,6 +9,7 @@
 [alias]
 	cs = commit -s
 	dt = difftool -y
+	df = diff --word-diff=color
 [push]
     autoSetupRemote = true
 [commit]
@@ -15,3 +18,6 @@
 	tool = nvim_difftool
 [difftool "nvim_difftool"]
 	cmd = nvim -R -d $LOCAL $REMOTE
+[user]
+	name = Bloonstormz
+	email = ngminyao@gmail.com

@@ -24,6 +24,10 @@ gui:
   authorColors:
     '*': '#b4befe'
 git:
+  pagers:
+    - pager: delta --paging=never --diff-args=word-diff=color --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+    - {}
+
   commit:
     signOff: true
 customCommands:
