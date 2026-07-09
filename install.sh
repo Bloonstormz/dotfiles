@@ -239,6 +239,7 @@ fi
 
 DOWNLOAD_DIR="$SCRIPT_DIR/downloads"
 mkdir -p "$DOWNLOAD_DIR"
+mkdir -p "$DOWNLOAD_DIR/lsp"
 
 export PATH="$PATH:${XDG_DATA_HOME:-"$HOME/.local/share/nvim/mason/bin/"}"
 
@@ -420,8 +421,17 @@ fi
 
 # LSPs
 
+# Python based LSPs are installed manually as Mason only supports python -m venv
+# which is not always available.
+# See:
+#  - https://github.com/mason-org/mason.nvim/issues/1841
+#  - https://github.com/mason-org/mason.nvim/pull/1640
+#  - Potential Solution to this would be:
+#     https://github.com/mason-org/mason.nvim/pull/1640#issuecomment-4295111276
+#     but this is not a public API and could(?) break. Also requires some knowledge of Mason code
 if python_venv && prompt_install "ruff" "Ruff LSP"; then
     pip3 install ruff==0.15.13
+    ln -sf "$(which ruff)" "$DOWNLOAD_DIR/lsp/"
 fi
 
 if prompt_install "pyright" "Pyright LSP"; then
@@ -434,6 +444,6 @@ fi
 
 if check npm; then
     if prompt_install "bash-language-server" "Bash Language Server"; then
-        npm install -g bash-language-server@5.6.0
+        mason_install "bash-language-server"
     fi
 fi

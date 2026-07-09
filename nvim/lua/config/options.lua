@@ -26,3 +26,6 @@ if vim.fn.executable("zsh") == 1 then
 else
   opt.shell = "bash"
 end
+
+-- Add dotfile's installed lsps to PATH
+vim.env.PATH = vim.env.PATH .. ":" .. require("lib.file"):dotfile_dir() .. "/downloads/lsp/"

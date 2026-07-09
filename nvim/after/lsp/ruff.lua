@@ -9,7 +9,7 @@ local settings = {
 
 ---@type vim.lsp.Config
 return {
-  cmd = { require("lib.file").script_dir() .. "/../../../.venv/bin/ruff", "server" },
+  cmd = { require("lib.file"):lsp_dir() .. "/ruff", "server" },
   init_options = {
     settings = settings,
   },
