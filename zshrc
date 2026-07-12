@@ -43,6 +43,9 @@ _reset_to_beam() {
 precmd_functions+=(_reset_to_beam)
 
 HISTSIZE=1000
+unsetopt sharehistory
+setopt appendhistory
+setopt extendedhistory
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
