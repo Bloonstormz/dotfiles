@@ -28,6 +28,7 @@ return {
         settings = {
           bashIde = {
             includeAllWorkspaceSymbols = true,
+            shellcheckArguments = "-e SC1090",
           },
         },
       },
