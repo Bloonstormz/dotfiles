@@ -25,6 +25,8 @@ alias gitr='gr'
 { command -v gf && { unalias gf || unset gf; }; } >/dev/null 2>&1
 alias gf='git fetch --all'
 
+alias rg='\rg -M 250'
+
 _get_shell() {
     if [ -n "$ZSH_VERSION" ]; then
         echo "zsh"
