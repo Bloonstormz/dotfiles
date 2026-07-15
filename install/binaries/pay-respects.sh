@@ -8,3 +8,7 @@ do_install() {
 do_clean() {
 	cargo uninstall pay-respects
 }
+
+do_complete() {
+	echo "pay-respects %q"
+}
