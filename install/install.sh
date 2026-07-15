@@ -23,6 +23,8 @@ mkdir -p "$HOME/bin"
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 DOTFILE_DIR="$(realpath "$SCRIPT_DIR/..")"
 
+source "$SCRIPT_DIR/lib/link.sh"
+
 function check() {
 	for package in "$@"; do
 		command -v "$package" &>/dev/null || return 1
@@ -238,10 +240,10 @@ while :; do
 				{
 					(
 						set -e
-						pushd "$DOWNLOAD_DIR"
+						pushd "$DOWNLOAD_DIR" >/dev/null
 						do_clean
 					) && {
-						if command -v do_complete >/dev/null; then
+						if command -v do_complete &>/dev/null; then
 							do_complete | while IFS= read -r cmd_format; do
 								: "$cmd_format"
 								if IFS= read -r bin_name; then
@@ -282,7 +284,7 @@ while :; do
 
 		update_ready_list "$file" "success"
 
-		command -v do_complete && {
+		command -v do_complete &>/dev/null && {
 			do_complete | while IFS= read -r cmd_format; do
 				if IFS= read -r bin_name; then
 					comp_bin="${bin_name,,}"

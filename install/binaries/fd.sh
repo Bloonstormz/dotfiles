@@ -16,5 +16,5 @@ do_clean() {
 }
 
 do_complete() {
-	echo "fd --gen-completons %q"
+	echo "fd --gen-completions %q"
 }

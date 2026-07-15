@@ -7,6 +7,7 @@ do_install() {
 	extract_tar "bat.tar.gz" -s -o bat
 	ln -sf "$(realpath ./bat/bat)" "$HOME/bin/bat"
 
+	mkdir -p "$(dirname "$(bat --config-file)")"
 	link "$DOTFILE_DIR/configs/bat.config" "$(bat --config-file)"
 }
 
