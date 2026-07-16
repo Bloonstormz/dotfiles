@@ -56,6 +56,7 @@ function confirm_link() {
 			ln -sfT "$src_path" "$dest_path"
 		fi
 	else
+		mkdir -p "$(dirname "$dest_path")"
 		ln -sT "$src_path" "$dest_path"
 	fi
 }
