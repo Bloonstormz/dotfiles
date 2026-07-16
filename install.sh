@@ -34,6 +34,7 @@ link "$SCRIPT_DIR/local_aliases" "$HOME/.config" ".local_aliases"
 link "$SCRIPT_DIR/sh_profile" "$HOME/.config" ".profile"
 
 link "$SCRIPT_DIR/gitconfig" "$HOME" ".gitconfig"
+link "$SCRIPT_DIR/local.gitconfig" "$HOME/.config/git" "local.gitconfig"
 
 popd 1>/dev/null
 
