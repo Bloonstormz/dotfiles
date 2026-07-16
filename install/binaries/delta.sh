@@ -12,9 +12,9 @@ do_install() {
 }
 
 do_clean() {
-	rm "$HOME/.config/git/catppuccin.gitconfig"
-	rm "$DOTFILE_DIR/configs/catppuccin.gitconfig"
-	rm "$HOME/.config/git/delta.config"
+	maybe_rm "$HOME/.config/git/catppuccin.gitconfig"
+	maybe_rm "$DOTFILE_DIR/configs/catppuccin.gitconfig"
+	maybe_rm "$HOME/.config/git/delta.config"
 	cargo uninstall git-delta
 }
 

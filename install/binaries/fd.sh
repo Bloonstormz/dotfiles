@@ -11,8 +11,8 @@ do_install() {
 }
 
 do_clean() {
-	rm fd
-	rm "$HOME/bin/fd"
+	maybe_rm fd
+	maybe_rm "$HOME/bin/fd"
 }
 
 do_complete() {

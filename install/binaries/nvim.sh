@@ -10,6 +10,6 @@ do_install() {
 }
 
 do_clean() {
-	rm "$HOME/bin/nvim"
-	rm -r nvim
+	maybe_rm "$HOME/bin/nvim"
+	maybe_rm -r nvim
 }

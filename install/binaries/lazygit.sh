@@ -9,6 +9,6 @@ do_install() {
 }
 
 do_clean() {
-	rm "$HOME/bin/lazygit"
-	rm -r lazygit
+	maybe_rm "$HOME/bin/lazygit"
+	maybe_rm -r lazygit
 }

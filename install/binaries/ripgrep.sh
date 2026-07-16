@@ -15,8 +15,8 @@ do_install() {
 }
 
 do_clean() {
-	rm "$HOME/bin/rg"
-	rm rg
+	maybe_rm "$HOME/bin/rg"
+	maybe_rm rg
 }
 
 do_complete() {

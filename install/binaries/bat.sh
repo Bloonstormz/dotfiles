@@ -12,8 +12,8 @@ do_install() {
 }
 
 do_clean() {
-	rm "$(bat --config-file)"
-	rm -r ./bat
+	maybe_rm "$(bat --config-file)"
+	maybe_rm -r ./bat
 }
 
 do_complete() {

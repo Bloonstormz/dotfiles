@@ -25,6 +25,14 @@ DOTFILE_DIR="$(realpath "$SCRIPT_DIR/..")"
 
 source "$SCRIPT_DIR/lib/link.sh"
 
+function maybe_rm() {
+	local item="$1"
+	shift
+	if [[ -e "$item" ]]; then
+		rm "$@" "$item"
+	fi
+}
+
 function check() {
 	for package in "$@"; do
 		command -v "$package" &>/dev/null || return 1
@@ -223,6 +231,30 @@ for file in "$SCRIPT_DIR"/binaries/*.sh; do
 	unset -f do_install do_complete
 done
 
+function clean() {
+	(
+		set -e
+		pushd "$DOWNLOAD_DIR" >/dev/null
+		do_clean
+	) && {
+		# This is allowed to fail as failing to clean completions
+		# does not affect whether the binary failed to be clean
+		if command -v do_complete &>/dev/null; then
+			do_complete | while IFS= read -r cmd_format; do
+				: "$cmd_format"
+				if IFS= read -r bin_name; then
+					comp_bin="${bin_name,,}"
+				else
+					comp_bin="${BIN,,}"
+				fi
+				maybe_rm "$BASH_COMP/_$comp_bin" "$ZSH_COMP/_$comp_bin"
+			done
+			unset -v comp_bin cmd_format bin_name
+		fi
+		true
+	}
+}
+
 while :; do
 	if [[ "${#READY[@]}" -eq 0 ]]; then
 		break
@@ -237,26 +269,7 @@ while :; do
 		if check "$BIN"; then
 			if [[ "$CLEAN" == true ]] &&
 				prompt "$NAME already installed. Clean"; then
-				{
-					(
-						set -e
-						pushd "$DOWNLOAD_DIR" >/dev/null
-						do_clean
-					) && {
-						if command -v do_complete &>/dev/null; then
-							do_complete | while IFS= read -r cmd_format; do
-								: "$cmd_format"
-								if IFS= read -r bin_name; then
-									comp_bin="${bin_name,,}"
-								else
-									comp_bin="${BIN,,}"
-								fi
-								rm "$BASH_COMP/_$comp_bin" "$ZSH_COMP/_$comp_bin"
-							done
-							unset -v comp_bin cmd_format bin_name
-						fi
-					}
-				} || {
+				clean || {
 					echo "Failed to clean (exit $?)"
 					update_ready_list "$file" "failure"
 					continue
