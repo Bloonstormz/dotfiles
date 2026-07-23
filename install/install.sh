@@ -232,11 +232,15 @@ for file in "$SCRIPT_DIR"/binaries/*.sh; do
 done
 
 function clean() {
+	set +e
 	(
 		set -e
 		pushd "$DOWNLOAD_DIR" >/dev/null
 		do_clean
-	) && {
+	)
+	status=$?
+	set -e
+	if [[ $status -eq 0 ]]; then
 		# This is allowed to fail as failing to clean completions
 		# does not affect whether the binary failed to be clean
 		if command -v do_complete &>/dev/null; then
@@ -252,7 +256,7 @@ function clean() {
 			unset -v comp_bin cmd_format bin_name
 		fi
 		true
-	}
+	fi
 }
 
 while :; do
@@ -285,15 +289,19 @@ while :; do
 			continue
 		fi
 
+		set +e
 		(
-			pushd "$DOWNLOAD_DIR" >/dev/null
 			set -e
+			pushd "$DOWNLOAD_DIR" >/dev/null
 			do_install
-		) || {
+		)
+		status=$?
+		set -e
+		if [[ $status -ne 0 ]]; then
 			echo "Failed to install $NAME (exit $?)"
 			update_ready_list "$file" "failure"
 			continue
-		}
+		fi
 
 		update_ready_list "$file" "success"
 
