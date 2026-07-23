@@ -14,10 +14,15 @@ do_install() {
 
 	popd >/dev/null
 
-	# Install oh-my-zsh
-	curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh -s -- --keep-zshrc --unattended
-	# Install powerlevel10k
-	git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+	if [[ ! -e "$HOME/oh-my-zsh" ]]; then
+		# Install oh-my-zsh
+		curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh -s -- --keep-zshrc --unattended
+	fi
+	local p10k_install_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+	if [[ ! -e "$p10k_install_path" ]]; then
+		# Install powerlevel10k
+		git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_install_path"
+	fi
 
 	if prompt "Make zsh the default shell"; then
 		ZSH="$(command -v zsh)"
