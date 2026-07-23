@@ -328,17 +328,3 @@ if python_venv && prompt_install "ruff" "Ruff LSP"; then
 	pip3 install ruff==0.15.13
 	ln -sf "$(which ruff)" "$DOWNLOAD_DIR/lsp/"
 fi
-
-if prompt_install "pyright" "Pyright LSP"; then
-	mason_install "pyright"
-fi
-
-if prompt_install "clangd" "Clangd"; then
-	mason_install "clangd"
-fi
-
-if check npm; then
-	if prompt_install "bash-language-server" "Bash Language Server"; then
-		mason_install "bash-language-server"
-	fi
-fi
