@@ -1,7 +1,7 @@
 BIN="zsh"
 
 do_install() {
-	wget -O zsh.tar.xz https://www.zsh.org/pub/zsh-5.9.1.tar.xz
+	wget -O zsh.tar.xz https://sourceforge.net/projects/zsh/files/latest/download
 	trap "rm zsh.tar.xz" EXIT
 
 	mkdir -p ./zsh
