@@ -15,8 +15,11 @@ mkdir -p "$HOME/.config/git"
 
 pushd "$SCRIPT_DIR" 1>/dev/null
 
-# Get all directories that aren't hidden
-mapfile -t DIRS < <(find . -maxdepth 1 -type d -not -name '.*')
+# Get all directories that aren't gitignored, hidden, not install/ or configs/
+mapfile -t to_ignore < <(awk '/[^^/]+$/ {print $0}' .gitignore)
+to_ignore+=(".*" "install" "configs")
+# Use %s instead of %q to allow globbing. Surround it with '' to avoid issues with spaces
+mapfile -t DIRS < <(printf -- "-a -not -name '%s' " "${to_ignore[@]}" | xargs find . -maxdepth 1 -type d)
 
 for dir in "${DIRS[@]}"; do
     confirm_link "$dir" "$HOME/.config/$dir"
