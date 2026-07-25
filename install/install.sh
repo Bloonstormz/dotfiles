@@ -40,12 +40,12 @@ function check() {
 	return 0
 }
 function prompt() {
-	printf "%s [y/n]?: " "$1"
+	printf "%s [Y/n]?: " "$1"
 	read -r -n 1 confirm
 
 	[[ $confirm == "\n" ]] || printf "\n"
 
-	[[ $confirm == "y" ]] && return 0
+	[[ ${confirm,,} == "y" || ${confirm} == "\n" ]] && return 0
 	return 1
 }
 function prompt_install() {
@@ -289,17 +289,25 @@ while :; do
 			continue
 		fi
 
-		set +e
-		(
+		status=1
+		while [[ $status -ne 0 ]]; do
+			set +e
+			(
+				set -e
+				pushd "$DOWNLOAD_DIR" >/dev/null
+				do_install
+			)
+			status=$?
 			set -e
-			pushd "$DOWNLOAD_DIR" >/dev/null
-			do_install
-		)
-		status=$?
-		set -e
+			if [[ $status -ne 0 ]]; then
+				echo "Failed to install $NAME (exit $?)"
+				if ! prompt "Retry installation"; then
+					update_ready_list "$file" "failure"
+					break
+				fi
+			fi
+		done
 		if [[ $status -ne 0 ]]; then
-			echo "Failed to install $NAME (exit $?)"
-			update_ready_list "$file" "failure"
 			continue
 		fi
 
