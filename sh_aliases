@@ -27,6 +27,8 @@ alias gf='git fetch --all'
 
 alias rg='\rg -M 250'
 
+alias man='MANWIDTH=$((COLUMNS-4)) \man'
+
 _get_shell() {
     if [ -n "$ZSH_VERSION" ]; then
         echo "zsh"
