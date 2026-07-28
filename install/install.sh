@@ -300,7 +300,7 @@ while :; do
 			status=$?
 			set -e
 			if [[ $status -ne 0 ]]; then
-				echo "Failed to install $NAME (exit $?)"
+				echo "Failed to install $NAME (exit $status)"
 				if ! prompt "Retry installation"; then
 					update_ready_list "$file" "failure"
 					break
