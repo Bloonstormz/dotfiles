@@ -270,6 +270,7 @@ while :; do
 		source "$file"
 
 		NAME="${NAME:-"${BIN}"}"
+		DID_CLEAN=false
 		if check "$BIN"; then
 			if [[ "$CLEAN" == true ]] &&
 				prompt "$NAME already installed. Clean"; then
@@ -278,13 +279,14 @@ while :; do
 					update_ready_list "$file" "failure"
 					continue
 				}
+				DID_CLEAN=true
 			else
 				update_ready_list "$file" "success"
 				continue
 			fi
 		fi
 
-		if ! prompt_install "$BIN" "$NAME"; then
+		if [[ $DID_CLEAN == false ]] && ! prompt_install "$BIN" "$NAME"; then
 			update_ready_list "$file" "failure"
 			continue
 		fi
