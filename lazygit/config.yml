@@ -30,6 +30,9 @@ git:
 
   commit:
     signOff: true
+  log:
+    order: default
+
 customCommands:
   - key: '<ctrl+shift+a>'
     context: 'commits'
