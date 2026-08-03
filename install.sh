@@ -1,12 +1,12 @@
 #!/bin/bash
 
-set -euo pipefail
-
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 source "$SCRIPT_DIR/bashrc" || true
 
 source "$SCRIPT_DIR/install/lib/link.sh"
+
+set -euo pipefail
 
 mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/bash_comp"
