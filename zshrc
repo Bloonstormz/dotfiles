@@ -15,11 +15,19 @@ autoload -U +X bashcompinit && bashcompinit
 
 source ~/.config/.profile || return
 
-# Path to your Oh My Zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
+# Prefer an existing manual installation, otherwise use Home Manager's package.
+if [[ -d "$HOME/.oh-my-zsh" ]]; then
+  export ZSH="$HOME/.oh-my-zsh"
+else
+  export ZSH="$HOME/.nix-profile/share/oh-my-zsh"
+fi
 
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="powerlevel10k/powerlevel10k"
+if [[ -e "$ZSH/custom/themes/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+  ZSH_THEME="powerlevel10k/powerlevel10k"
+else
+  ZSH_THEME=""
+fi
 
 COMPLETION_WAITING_DOTS="true"
 
@@ -34,6 +42,10 @@ plugins=(
 export LESS="-R -F"
 
 source $ZSH/oh-my-zsh.sh
+
+if [[ -z "$ZSH_THEME" ]]; then
+  source "$HOME/.nix-profile/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
+fi
 
 # User configuration
 

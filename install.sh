@@ -38,8 +38,18 @@ link "$SCRIPT_DIR/sh_profile" "$HOME/.config" ".profile"
 
 link "$SCRIPT_DIR/gitconfig" "$HOME" ".gitconfig"
 link "$SCRIPT_DIR/local.gitconfig" "$HOME/.config/git" "local.gitconfig"
+link "$SCRIPT_DIR/configs/delta.config" "$HOME/.config/git" "delta.config"
+link "$SCRIPT_DIR/configs/catppuccin.gitconfig" "$HOME/.config/git" "catppuccin.gitconfig"
+link "$SCRIPT_DIR/configs/bat.config" "$HOME/.config/bat" "config"
 
 popd 1>/dev/null
 
-# Install packages
-"$SCRIPT_DIR/install/install.sh" "$@"
+# Install packages without asking Home Manager to own any dotfiles.
+if ! command -v nix >/dev/null 2>&1; then
+    echo "Nix is required. Install it from https://nixos.org/download/ and rerun this script." >&2
+    exit 1
+fi
+
+exec nix --extra-experimental-features "nix-command flakes" --impure \
+    run "path:$SCRIPT_DIR#home-manager" -- \
+    switch --impure --flake "path:$SCRIPT_DIR#default" "$@"

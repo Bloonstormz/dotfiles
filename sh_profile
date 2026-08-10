@@ -12,7 +12,7 @@ export EDITOR="nvim"
 export MANPATH="$HOME/share/man:$MANPATH"
 export MANPAGER="nvim +Man!"
 
-PATH="$HOME/.cargo/bin/:$HOME/bin/:$HOME/scripts/:$HOME/.local/bin:$PATH"
+PATH="$HOME/.nix-profile/bin:$HOME/.cargo/bin/:$HOME/bin/:$HOME/scripts/:$HOME/.local/bin:$PATH"
 
 [ -e "$HOME/.config/.localrc" ] && . "$HOME/.config/.localrc"
 
