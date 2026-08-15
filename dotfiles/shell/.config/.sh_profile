@@ -17,7 +17,11 @@ if ! [[ "$PATH" =~ $HOME/bin ]]; then
 fi
 
 # Trailing : to retain access to system man pages
-MANPATH="$HOME/share/man:"
+if [ -n "$MANPATH" ]; then
+	export MANPATH="$HOME/share/man:/usr/share/man:${MANPATH}"
+else
+	export MANPATH="$HOME/share/man:/usr/share/man:"
+fi
 export MANPATH
 
 if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
