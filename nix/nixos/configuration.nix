@@ -14,7 +14,7 @@
     shell = pkgs.zsh;
   };
 
-  environment.systemPackages = import ../packages/common.nix { inherit pkgs; };
+  environment.systemPackages = import ../packages/devTools.nix { inherit pkgs; };
 
   # Keep this at the release used for the initial NixOS installation.
   system.stateVersion = "26.05";

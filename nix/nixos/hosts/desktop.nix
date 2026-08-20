@@ -5,7 +5,7 @@
 
   networking.hostName = "desktop";
 
-  environment.systemPackages = import ../../packages/desktop.nix { inherit pkgs; };
+  environment.systemPackages = import ../../packages/gui.nix { inherit pkgs; };
 
   # Evaluation placeholders only. Replace these with the generated hardware
   # configuration and a real boot loader before building or deploying the host.
