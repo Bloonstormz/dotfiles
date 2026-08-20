@@ -1,5 +1,5 @@
 #!/bin/sh
-# shellcheck disable=SC1090,SC3043
+# shellcheck disable=SC1090,SC3043,SC1091
 
 # perl to remove any trailing new line
 # Convert to base 64 for OSC 52 to copy to clipboard. Works over ssh
