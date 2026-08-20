@@ -11,21 +11,26 @@
         "aarch64-linux"
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      mkCommonProfile =
+      mkProfile =
         system:
+        name:
+        package_paths:
         let
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = nixpkgs.legacyPackages.${system};
         in
         pkgs.buildEnv {
-          name = "dotfiles-common";
-          paths = import ./nix/packages/common.nix { inherit pkgs; };
+          inherit name;
+          paths = builtins.concatMap
+            (path: pkgs.lib.toList (pkgs.callPackage path { }))
+            package_paths;
           extraOutputsToInstall = [ "man" ];
         };
     in
     {
       packages = forAllSystems (system: {
-        common = mkCommonProfile system;
-        default = self.packages.${system}.common;
+        dev = mkProfile system "dev" [ ./nix/packages/devTools.nix ./nix/packages/lang.nix ];
+        all = mkProfile system "all" [ ./nix/packages/devTools.nix ./nix/packages/lang.nix ./nix/packages/gui.nix ];
+        default = self.packages.${system}.dev;
       });
 
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
