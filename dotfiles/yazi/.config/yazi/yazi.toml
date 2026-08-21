@@ -1,0 +1,9 @@
+[mgr]
+sort_by="natural"
+sort_dir_first=true
+linemode="permissions"
+show_symlink=true
+
+[preview]
+tab_size=4
+image_delay=150

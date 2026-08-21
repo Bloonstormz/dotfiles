@@ -19,6 +19,7 @@ with pkgs;
   tree-sitter
   tmux
   unzip
+  yazi
   zsh
   zsh-powerlevel10k
 ]

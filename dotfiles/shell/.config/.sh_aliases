@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # shellcheck disable=SC1090,SC3043,SC1091
 
 # perl to remove any trailing new line
@@ -55,6 +55,16 @@ re_source() {
 
 if _command_exists pay-respects; then
     eval "$(pay-respects "$(_get_shell)" --alias)"
+fi
+if _command_exists yazi; then
+    yz() {
+        local tmp cwd
+        tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+        command yazi "$@" --cwd-file="$tmp"
+        IFS= read -r -d '' cwd <"$tmp"
+        [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+        command rm -f -- "$tmp"
+    }
 fi
 
 [ -e "$HOME/.config/.local_aliases" ] && . "$HOME/.config/.local_aliases"
