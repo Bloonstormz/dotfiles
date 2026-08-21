@@ -8,6 +8,7 @@ with pkgs;
   curl
   delta
   fd
+  fzf
   git
   lazygit
   neovim

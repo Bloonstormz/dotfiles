@@ -66,5 +66,43 @@ if _command_exists yazi; then
         command rm -f -- "$tmp"
     }
 fi
+if _command_exists fzf; then
+    eval "$(command fzf --"$(_get_shell)")"
+    fzf() {
+        if [[ -t 0 ]]; then
+            if [[ $# -eq 0 ]]; then
+                command fzf
+            elif [[ $# -eq 1 ]]; then
+                "$@" "$(command fzf)"
+            else
+                sub_cmd=()
+                main_cmd=()
+                while [[ $# -gt 0 ]]; do
+                    arg="$1"
+                    shift
+
+                    case "$arg" in
+                    --)
+                        main_cmd=("$@")
+                        break
+                        ;;
+                    *)
+                        sub_cmd+=("$arg")
+                        ;;
+                    esac
+                done
+
+                if [[ ${#main_cmd[@]} -eq 0 ]]; then
+                    main_cmd=("${sub_cmd[@]}")
+                    sub_cmd=()
+                fi
+
+                "${main_cmd[@]}" "$(command fzf "${sub_cmd[@]}")"
+            fi
+        else
+            command fzf "$@"
+        fi
+    }
+fi
 
 [ -e "$HOME/.config/.local_aliases" ] && . "$HOME/.config/.local_aliases"
