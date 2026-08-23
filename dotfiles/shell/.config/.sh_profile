@@ -10,8 +10,13 @@ else
 fi
 export PATH
 _add_path() {
-	if ! [[ "$PATH" =~ $1 ]]; then
-		PATH="$PATH:$1"
+	if [[ $# -gt 1 ]]; then
+		local target="$2"
+	else
+		local target="PATH"
+	fi
+	if ! eval "[[ '$target' =~ $1 ]]"; then
+		eval "$target=$1:\$$target"
 	fi
 }
 _add_path "$HOME/.local/bin"
@@ -19,12 +24,15 @@ _add_path "$HOME/bin"
 _add_path "$HOME/.local/state/nix/profiles/profile/bin"
 
 # Trailing : to retain access to system man pages
-if [ -n "$MANPATH" ]; then
-	export MANPATH="$HOME/share/man:/usr/share/man:${MANPATH}"
-else
-	export MANPATH="$HOME/share/man:/usr/share/man:"
+if [ -z "$MANPATH" ]; then
+	MANPATH=":"
 fi
 export MANPATH
+_add_path "$HOME/share/man" MANPATH
+_add_path "$HOME/.nix-profile/share/man" MANPATH
+_add_path "/usr/share/man" MANPATH
+
+unset _add_path
 
 if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 	. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh

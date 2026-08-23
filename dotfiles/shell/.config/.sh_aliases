@@ -27,7 +27,14 @@ alias gf='git fetch --all'
 
 alias rg='\rg -M 250'
 
-alias man='MANWIDTH=$((COLUMNS-4)) \man'
+man() {
+    local width=${MANWIDTH:-$((COLUMNS - 4))}
+    if command man -O width=$COLUMNS man &>/dev/null; then
+        command man -O "width=$width" "$@"
+    else
+        MANWIDTH=$width command man "$@"
+    fi
+}
 
 _get_shell() {
     if [ -n "$ZSH_VERSION" ]; then
