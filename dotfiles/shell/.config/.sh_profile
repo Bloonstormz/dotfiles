@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # shellcheck disable=SC1091
 
 # Reset path to default so repeated sourcing of dotfile doesn't make PATH ridiculously long
@@ -9,12 +9,14 @@ else
 	PATH="$HOME/scripts:$HOME/.local/bin:$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 fi
 export PATH
-if ! [[ "$PATH" =~ $HOME/.local/bin ]]; then
-	PATH="$HOME/.local/bin:$PATH"
-fi
-if ! [[ "$PATH" =~ $HOME/bin ]]; then
-	PATH="$HOME/bin:$PATH"
-fi
+_add_path() {
+	if ! [[ "$PATH" =~ $1 ]]; then
+		PATH="$PATH:$1"
+	fi
+}
+_add_path "$HOME/.local/bin"
+_add_path "$HOME/bin"
+_add_path "$HOME/.local/state/nix/profiles/profile/bin"
 
 # Trailing : to retain access to system man pages
 if [ -n "$MANPATH" ]; then
@@ -28,6 +30,8 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 	. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
 	. "$HOME/.nix-profile/etc/profile.d/nix.sh"
+elif [ -e "/etc/profile.d/nix.sh" ]; then
+	. "/etc/profile.d/nix.sh"
 fi
 
 # enable color support of ls and also add handy aliases
