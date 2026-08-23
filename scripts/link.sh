@@ -33,9 +33,26 @@ confirm_conflict() {
   local destination="$1"
   local reply=""
 
-  printf '%s already exists. Back it up and replace it [y/N]? ' "$destination"
-  read -r reply || true
-  [[ "$reply" == "y" || "$reply" == "Y" ]]
+  while true; do
+    printf '%s already exists. (S)kip, (b)ackup or (r)eplace it? ' "$destination" >&2
+    read -r reply || true
+    case "${reply,,}" in
+    b | backup)
+      echo "backup"
+      ;;
+    r | replace)
+      echo "replace"
+      return
+      ;;
+    "" | s | skip)
+      echo "skip"
+      return
+      ;;
+    *)
+      echo "Unrecognized Option: '${reply}'" >&2
+      ;;
+    esac
+  done
 }
 
 link_leaf() {
@@ -49,11 +66,18 @@ link_leaf() {
   fi
 
   if [[ -e "$destination" || -L "$destination" ]]; then
-    if ! confirm_conflict "$destination"; then
+    case "$(confirm_conflict "$destination")" in
+    "backup")
+      backup_conflict "$destination"
+      ;;
+    "replace")
+      rm -f "$destination"
+      ;;
+    "skip")
       printf 'Skipped %s\n' "$destination"
       return 0
-    fi
-    backup_conflict "$destination"
+      ;;
+    esac
   fi
 
   mkdir -p -- "$(dirname -- "$destination")"
@@ -95,7 +119,7 @@ link_tree() {
   done
 }
 
-if (( $# == 0 )); then
+if (($# == 0)); then
   mapfile -t packages < <(
     find "$DOTFILES_ROOT" -mindepth 1 -maxdepth 1 -type d -not -name 'local' -printf '%f\n' | sort
   )
