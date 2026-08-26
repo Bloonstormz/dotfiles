@@ -1,6 +1,5 @@
 theme = Catppuccin Mocha
 cursor-style = bar
-shell-integration-features = ssh-terminfo
+shell-integration-features = ssh-terminfo,sudo,cursor
 clipboard-read = allow
 keybind = ctrl+shift+w=unbind
-keybind = ctrl+shift+t=unbind
