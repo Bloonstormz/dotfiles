@@ -27,6 +27,10 @@ alias gf='git fetch --all'
 
 alias rg='\rg -M 250'
 
+# Sudo with PATH set to running user's PATH
+# TODO: Consider an alias which also sets XDG_* variables to reuse user configs?
+alias sudop='sudo env PATH="$PATH"'
+
 man() {
     local width=${MANWIDTH:-$((COLUMNS - 4))}
     if command man -O width=$COLUMNS man &>/dev/null; then
