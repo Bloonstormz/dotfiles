@@ -26,3 +26,5 @@ if vim.fn.executable("zsh") == 1 then
 else
   opt.shell = "bash"
 end
+
+opt.clipboard = "unnamed"
