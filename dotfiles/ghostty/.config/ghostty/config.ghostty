@@ -3,3 +3,4 @@ cursor-style = bar
 shell-integration-features = ssh-terminfo,sudo,cursor
 clipboard-read = allow
 keybind = ctrl+shift+w=unbind
+maximize=true
