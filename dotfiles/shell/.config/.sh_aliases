@@ -81,38 +81,38 @@ fi
 if _command_exists fzf; then
     eval "$(command fzf --"$(_get_shell)")"
     fzf() {
-        if [[ -t 0 ]]; then
-            if [[ $# -eq 0 ]]; then
-                command fzf
-            elif [[ $# -eq 1 ]]; then
-                "$@" "$(command fzf)"
-            else
-                sub_cmd=()
-                main_cmd=()
-                while [[ $# -gt 0 ]]; do
-                    arg="$1"
-                    shift
+        if ! [[ -t 0 ]]; then
+            # TODO: Find a way to make this wrapper work with the pipe
+            echo "No stdin available. fzf wrapper does not support pipes" >&2
+            return 1
+        fi
+        local sub_cmd=()
+        local main_cmd=()
+        while [[ $# -gt 0 ]]; do
+            arg="$1"
+            shift
 
-                    case "$arg" in
-                    --)
-                        main_cmd=("$@")
-                        break
-                        ;;
-                    *)
-                        sub_cmd+=("$arg")
-                        ;;
-                    esac
-                done
+            case "$arg" in
+            --)
+                main_cmd+=("$@")
+                break
+                ;;
+            -*)
+                sub_cmd+=("$arg")
+                ;;
+            *)
+                main_cmd=("$arg" "$@")
+                break
+                ;;
+            esac
+        done
 
-                if [[ ${#main_cmd[@]} -eq 0 ]]; then
-                    main_cmd=("${sub_cmd[@]}")
-                    sub_cmd=()
-                fi
-
-                "${main_cmd[@]}" "$(command fzf "${sub_cmd[@]}")"
-            fi
+        if [[ ${#main_cmd[@]} -eq 0 ]]; then
+            command fzf "${sub_cmd[@]}"
         else
-            command fzf "$@"
+            local input
+            input="$(command fzf "${sub_cmd[@]}")" || return
+            "${main_cmd[@]}" "$input"
         fi
     }
 fi
