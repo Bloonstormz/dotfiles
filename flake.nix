@@ -28,8 +28,8 @@
     in
     {
       packages = forAllSystems (system: {
-        dev = mkProfile system "dev" [ ./nix/packages/devTools.nix ./nix/packages/lang.nix ];
-        all = mkProfile system "all" [ ./nix/packages/devTools.nix ./nix/packages/lang.nix ./nix/packages/gui.nix ];
+        dev = mkProfile system "dev" [ ./nix/packages/devTools.nix ];
+        all = mkProfile system "all" [ ./nix/packages/devTools.nix ./nix/packages/gui.nix ];
         default = self.packages.${system}.dev;
       });
 
