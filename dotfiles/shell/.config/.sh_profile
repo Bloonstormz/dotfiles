@@ -1,38 +1,42 @@
 #!/bin/bash
 # shellcheck disable=SC1091
 
-# Reset path to default so repeated sourcing of dotfile doesn't make PATH ridiculously long
-# If PATH isn't being set in /etc/environment then use a sensible default
-if grep -q ^PATH= /etc/environment; then
-	. /etc/environment
-else
-	PATH="$HOME/scripts:$HOME/.local/bin:$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-fi
 export PATH
 _add_path() {
-	if [[ $# -gt 1 ]]; then
-		local target="$2"
-	else
-		local target="PATH"
-	fi
-	if ! eval "[[ '$target' =~ $1 ]]"; then
-		eval "$target=$1:\$$target"
-	fi
+	local target="$1"
+	local to_add="$2"
+	local cur_val
+	eval "cur_val=\"\${$target}\""
+
+	case ":$cur_val:" in
+	*":$to_add:"*)
+		;;
+	*)
+		if [[ -z "$cur_val" ]]; then
+			eval "$target=\"\$to_add\""
+		else
+			eval "$target=\"\$to_add:\$cur_val\""
+		fi
+		;;
+	esac
 }
-_add_path "$HOME/.local/bin"
-_add_path "$HOME/bin"
-_add_path "$HOME/.local/state/nix/profiles/profile/bin"
+_add_path PATH "$HOME/.local/bin"
+_add_path PATH "$HOME/bin"
+_add_path PATH "$HOME/.nix-profile/bin"
+_add_path PATH "$HOME/scripts"
+
+_add_path XDG_DATA_DIRS "/usr/share/"
+_add_path XDG_DATA_DIRS "/usr/local/share/"
+_add_path XDG_DATA_DIRS "$HOME/.nix-profile/share/"
 
 # Trailing : to retain access to system man pages
 if [ -z "$MANPATH" ]; then
 	MANPATH=":"
 fi
 export MANPATH
-_add_path "$HOME/share/man" MANPATH
-_add_path "$HOME/.nix-profile/share/man" MANPATH
-_add_path "/usr/share/man" MANPATH
-
-unset _add_path
+_add_path MANPATH "$HOME/share/man"
+_add_path MANPATH "$HOME/.nix-profile/share/man"
+_add_path MANPATH "/usr/share/man"
 
 if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 	. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -74,9 +78,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
-PATH="$HOME/scripts:$PATH"
-
 [ -e "$HOME/.config/.localrc" ] && . "$HOME/.config/.localrc"
+
+unset _add_path
 
 if [ -e "$HOME/.config/.sh_aliases" ]; then
 	. "$HOME/.config/.sh_aliases"
