@@ -1,4 +1,4 @@
-theme = dark:Catppuccin Mocha,light:Catppuccin Latte
+theme = Catppuccin Mocha
 cursor-style = bar
 shell-integration-features = ssh-terminfo,sudo,cursor
 clipboard-read = allow
