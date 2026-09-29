@@ -11,31 +11,43 @@
         "aarch64-linux"
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+      declarePkg = import ./nix/lib/declarePkg.nix;
       mkProfile =
-        system:
-        name:
-        package_paths:
+        system: name: package_paths:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
         pkgs.buildEnv {
           inherit name;
-          paths = builtins.concatMap
-            (path: pkgs.lib.toList (pkgs.callPackage path { }))
-            package_paths;
+          paths = builtins.concatMap (
+            path:
+            pkgs.callPackage declarePkg {
+              inherit pkgs;
+              pkgList = path;
+              type = "all-pkgs";
+            }
+          ) package_paths;
           extraOutputsToInstall = [ "man" ];
         };
+      baseModules = [
+        ./nix/nixos/modules/display.nix
+        ./nix/nixos/modules/audio.nix
+        ./nix/nixos/modules/networking.nix
+      ];
     in
     {
       packages = forAllSystems (system: {
         dev = mkProfile system "dev" [ ./nix/packages/devTools.nix ];
-        all = mkProfile system "all" [ ./nix/packages/devTools.nix ./nix/packages/gui.nix ];
+        all = mkProfile system "all" [
+          ./nix/packages/devTools.nix
+          ./nix/packages/gui.nix
+        ];
         default = self.packages.${system}.dev;
       });
 
-      nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        modules = [ ./nix/nixos/hosts/desktop.nix ];
+        modules = baseModules ++ [ ./nix/nixos/hosts/thinkpad.nix ];
       };
     };
 }

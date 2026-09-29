@@ -1,6 +1,5 @@
-{ pkgs }:
-
-with pkgs; [
-  ghostty
-  firefox
+[
+  "ghostty"
+  { firefox.enable = true; }
+  "kdePackages.dolphin"
 ]
