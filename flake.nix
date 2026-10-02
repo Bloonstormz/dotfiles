@@ -29,11 +29,6 @@
           ) package_paths;
           extraOutputsToInstall = [ "man" ];
         };
-      baseModules = [
-        ./nix/nixos/modules/display.nix
-        ./nix/nixos/modules/audio.nix
-        ./nix/nixos/modules/networking.nix
-      ];
     in
     {
       packages = forAllSystems (system: {
@@ -47,7 +42,10 @@
 
       nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        modules = baseModules ++ [ ./nix/nixos/hosts/thinkpad.nix ];
+        modules = [
+          ./nix/nixos/hosts/thinkpad.nix
+          ./nix/nixos/configuration.nix
+        ];
       };
     };
 }

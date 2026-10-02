@@ -1,4 +1,8 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   declarePkg = import ../lib/declarePkg.nix;
@@ -6,7 +10,12 @@ let
   gui = import ../packages/gui.nix;
 in
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ./nix/nixos/modules/display.nix
+    ./nix/nixos/modules/audio.nix
+    ./nix/nixos/modules/networking.nix
+  ];
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
