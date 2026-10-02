@@ -52,16 +52,21 @@ export LESS="-R -F"
 
 [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
+found=false
 for powerlevel10k_theme in \
   "$HOME/.nix-profile/share/zsh-powerlevel10k/powerlevel10k.zsh-theme" \
   /run/current-system/sw/share/zsh-powerlevel10k/powerlevel10k.zsh-theme \
   "${ZSH_CUSTOM:-$ZSH/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme"; do
   if [[ -f "$powerlevel10k_theme" ]]; then
+    found=true
     source "$powerlevel10k_theme"
     break
   fi
 done
-unset powerlevel10k_theme nix_profile
+if [[ "$found" == false ]]; then
+  export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
+fi
+unset powerlevel10k_theme nix_profile found
 
 # User configuration
 
