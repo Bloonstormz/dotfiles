@@ -1,4 +1,0 @@
-[
-  "ghostty"
-  { firefox.enable = true; }
-]

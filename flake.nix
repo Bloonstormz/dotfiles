@@ -1,10 +1,21 @@
 {
   description = "NixOS configuration and portable CLI packages";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    hjem = {
+      url = "github:feel-co/hjem";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+      hjem,
+    }:
     let
       supportedSystems = [
         "x86_64-linux"
@@ -12,40 +23,48 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       declarePkg = import ./nix/lib/declarePkg.nix;
+      declareHjem = import ./nix/lib/declareHjem.nix;
+
+      devPkgs = [
+        (./nix/nixos/modules/shell.nix)
+        (./nix/nixos/modules/editor.nix)
+        (./nix/nixos/modules/terminalUtil.nix)
+      ];
+      allPkgs = devPkgs ++ [
+        (./nix/nixos/modules/apps.nix)
+      ];
+
       mkProfile =
-        system: name: package_paths:
+        system: name: modulePaths:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
         pkgs.buildEnv {
           inherit name;
-          paths = builtins.concatMap (
-            path:
-            pkgs.callPackage declarePkg {
-              inherit pkgs;
-              pkgList = path;
-              type = "all-pkgs";
-            }
-          ) package_paths;
+          paths = declarePkg pkgs modulePaths;
           extraOutputsToInstall = [ "man" ];
         };
     in
     {
       packages = forAllSystems (system: {
-        dev = mkProfile system "dev" [ ./nix/packages/devTools.nix ];
-        all = mkProfile system "all" [
-          ./nix/packages/devTools.nix
-          ./nix/packages/gui.nix
-        ];
+        dev = mkProfile system "dev" devPkgs;
+        all = mkProfile system "all" allPkgs;
         default = self.packages.${system}.dev;
       });
+
+      hjemConfigurations = {
+        dev = declareHjem devPkgs;
+        all = declareHjem allPkgs;
+      };
 
       nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           ./nix/nixos/hosts/thinkpad.nix
           ./nix/nixos/configuration.nix
-        ];
+          hjem.nixosModules.default
+        ]
+        ++ allPkgs;
       };
     };
 }

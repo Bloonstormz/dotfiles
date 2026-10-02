@@ -4,68 +4,52 @@
   ...
 }:
 
-let
-  declarePkg = import ../lib/declarePkg.nix;
-  devTools = import ../packages/devTools.nix;
-  gui = import ../packages/gui.nix;
-in
 {
+  options = {
+    forEachUser = lib.mkOption {
+    };
+  };
+
   imports = [
-    ./nix/nixos/modules/display.nix
-    ./nix/nixos/modules/audio.nix
-    ./nix/nixos/modules/networking.nix
+    ./modules/display.nix
+    ./modules/audio.nix
+    ./modules/networking.nix
+    ./modules/lang.nix
   ];
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  config = {
+    forEachUser = setting: {
+      minng01 = setting;
+    };
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+    nix.settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
 
-  programs =
-    lib.mergeAttrsList (declarePkg {
-      inherit pkgs;
-      pkgList = devTools;
-      type = "nixos-programs";
-    })
-    // lib.mergeAttrsList (declarePkg {
-      inherit pkgs;
-      pkgList = gui;
-      type = "nixos-programs";
-    })
-    // {
+    boot.kernelPackages = pkgs.linuxPackages_latest;
+
+    programs = {
       nix-ld.enable = true;
     };
 
-  users.users.minng01 = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
-    shell = pkgs.zsh;
-  };
+    users.users.minng01 = {
+      isNormalUser = true;
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+      ];
+      shell = pkgs.zsh;
+    };
 
-  environment.systemPackages =
-    (declarePkg {
-      inherit pkgs;
-      pkgList = devTools;
-      type = "pkgs";
-    })
-    ++ (with pkgs; [
+    environment.systemPackages = with pkgs; [
       nerd-fonts.jetbrains-mono
       fastfetch
-    ])
-    ++ (pkgs.callPackage ./modules/lang.nix { })
-    ++ (declarePkg {
-      inherit pkgs;
-      pkgList = gui;
-      type = "pkgs";
-    });
+    ];
 
-  time.timeZone = "Europe/London";
+    time.timeZone = "Europe/London";
 
-  # Keep this at the release used for the initial NixOS installation.
-  system.stateVersion = "26.05";
+    # Keep this at the release used for the initial NixOS installation.
+    system.stateVersion = "26.05";
+  };
 }

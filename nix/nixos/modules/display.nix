@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  config,
+  ...
+}:
 
 {
   programs = {
@@ -21,4 +25,12 @@
   ];
 
   services.displayManager.ly.enable = true;
+
+  hjem = {
+    users = config.forEachUser {
+      xdg.config.files = {
+        hypr.source = ../../../dotfiles/hypr;
+      };
+    };
+  };
 }

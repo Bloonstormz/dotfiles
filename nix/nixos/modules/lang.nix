@@ -1,13 +1,15 @@
-{ pkgs }:
+{ pkgs, ... }:
 
-with pkgs;
-[
-  clang
-  cargo
-  gcc
+{
+  environment.systemPackages = with pkgs; [
+    clang
+    gcc
 
-  python314
-  python314Packages.dbus-python
+    python314
+    python314Packages.dbus-python
 
-  nodejs_24
-]
+    cargo
+
+    nodejs_24
+  ];
+}

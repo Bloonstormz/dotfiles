@@ -4,3 +4,4 @@ downloads/
 dotfiles/local/
 dotfiles/nvim/.config/nvim/lua/config/local.lua
 dotfiles/nvim/.config/nvim/lua/plugins/local.lua
+result
