@@ -120,14 +120,14 @@ if _command_exists fzf; then
             if [[ "${#lines[@]}" -gt 0 ]]; then
                 printf "%s\n" "${lines[@]}" | command fzf "${sub_cmd[@]}"
             else
-                command fzf "${sub_cmd[@]}"
+                command fzf "${sub_cmd[@]}" --bind "alt-i:reload($FZF_DEFAULT_COMMAND -I)"
             fi
         else
             local input
             if [[ "${#lines[@]}" -gt 0 ]]; then
                 input="$(printf "%s\n" "${lines[@]}" | command fzf "${sub_cmd[@]}")" || return
             else
-                input="$(command fzf "${sub_cmd[@]}")" || return
+                input="$(command fzf "${sub_cmd[@]}" --bind "alt-i:reload($FZF_DEFAULT_COMMAND -I)")" || return
             fi
             "${main_cmd[@]}" "$input"
         fi
