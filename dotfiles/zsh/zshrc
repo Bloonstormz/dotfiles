@@ -26,15 +26,6 @@ if [[ -e "$HOME/.config/.sh_profile" ]]; then
   source ~/.config/.sh_profile || return
 fi
 
-# Path to your Oh My Zsh installation.
-if [[ -d "$HOME/.nix-profile/share/oh-my-zsh" ]]; then
-  export ZSH="$HOME/.nix-profile/share/oh-my-zsh"
-elif [[ -d /run/current-system/sw/share/oh-my-zsh ]]; then
-  export ZSH="/run/current-system/sw/share/oh-my-zsh"
-else
-  export ZSH="$HOME/.oh-my-zsh"
-fi
-
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME=""
 
@@ -50,7 +41,18 @@ plugins=(
 
 export LESS="-R -F"
 
-[[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+if [[ -z "$ZSH" ]]; then
+  # Path to your Oh My Zsh installation.
+  if [[ -d "$HOME/.nix-profile/share/oh-my-zsh" ]]; then
+    export ZSH="$HOME/.nix-profile/share/oh-my-zsh"
+  elif [[ -d /run/current-system/sw/share/oh-my-zsh ]]; then
+    export ZSH="/run/current-system/sw/share/oh-my-zsh"
+  else
+    export ZSH="$HOME/.oh-my-zsh"
+  fi
+fi
+
+[[ -n "$ZSH" && -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 found=false
 for powerlevel10k_theme in \
@@ -63,7 +65,7 @@ for powerlevel10k_theme in \
     break
   fi
 done
-if [[ "$found" == false ]]; then
+if [[ "$found" == false && -z "$PS1" ]]; then
   export PS1="%B%F{#a6e3a1}%n%f%b:%F{blue}%~%f %(?,%F{#a6e3a1},%F{red})>%f "
 fi
 unset powerlevel10k_theme nix_profile found
