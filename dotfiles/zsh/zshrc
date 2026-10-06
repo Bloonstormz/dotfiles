@@ -35,11 +35,16 @@ COMPLETION_WAITING_DOTS="true"
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
 plugins=(
-    web-search
+    dotenv
     repo
 )
 
 export LESS="-R -F"
+
+if [[ -n "$ZSH" ]] && ! [[ -d "$ZSH" ]]; then
+  echo "Warning: \$ZSH already defined, but $ZSH does not exist. Attempting backups" >&2
+  ZSH=""
+fi
 
 if [[ -z "$ZSH" ]]; then
   # Path to your Oh My Zsh installation.
@@ -52,12 +57,17 @@ if [[ -z "$ZSH" ]]; then
   fi
 fi
 
-[[ -n "$ZSH" && -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+if [[ -n "$ZSH" && -f "$ZSH/oh-my-zsh.sh" ]]; then
+  source "$ZSH/oh-my-zsh.sh"
+else
+  echo "Warning: oh-my-zsh not found" >&2
+fi
 
 found=false
 for powerlevel10k_theme in \
   "$HOME/.nix-profile/share/zsh-powerlevel10k/powerlevel10k.zsh-theme" \
   /run/current-system/sw/share/zsh-powerlevel10k/powerlevel10k.zsh-theme \
+  /run/current-system/sw/share/zsh/themes/powerlevel10k/powerlevel10k.zsh-theme \
   "${ZSH_CUSTOM:-$ZSH/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme"; do
   if [[ -f "$powerlevel10k_theme" ]]; then
     found=true
