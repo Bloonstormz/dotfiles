@@ -13,15 +13,19 @@
     };
     uwsm.enable = true;
     hyprlock.enable = true;
-    dms-shell.enable = true;
   };
 
-  services.hypridle.enable = true;
+  hardware.bluetooth.enable = true;
+
+  services = {
+    hypridle.enable = true;
+    tuned.enable = true;
+    upower.enable = true;
+  };
 
   environment.systemPackages = [
     pkgs.hyprland
-    pkgs.hyprlauncher
-    pkgs.swaynotificationcenter
+    pkgs.noctalia
   ];
 
   services.displayManager.ly.enable = true;
@@ -30,6 +34,7 @@
     users = config.forEachUser {
       xdg.config.files = {
         hypr.source = ../../../dotfiles/hypr;
+        noctalia.source = ../../../dotfiles/noctalia;
       };
     };
   };
