@@ -1,36 +1,37 @@
 {
 	"layer": "top",
 	"position": "top",
-	"mod": "dock",
-	"exclusive": true,
+	"exclusive": false,
 	"passthrough": false,
 	"gtk-layer-shell": true,
-	"modules-left": ["clock", "hyprland/workspaces"],
-	"modules-center": ["hyprland/window"],
+	"margin-left": 100,
+	"margin-right": 100,
+	"on-sigusr1": "hide",
+	"on-sigusr2": "show",
+
+	"modules-left": ["hyprland/workspaces"],
+	"modules-center": ["clock"],
 	"modules-right": [
+		"tray",
 		"network",
 		"bluetooth",
-		"battery",
-		"backlight",
+		"custom/separator",
 		"pulseaudio",
-		"pulseaudio#microphone"
+		"custom/separator",
+		"battery",
+		"group/group-power"
 	],
 	"hyprland/workspaces": {
-		"format": "{icon}",
-		"on-scroll-up": "hyprctl dispatch workspace e+1",
-		"on-scroll-down": "hyprctl dispatch workspace e-1",
-		"format-icons": {
-			"1": "",
-			"2": "",
-			"3": "",
-			"4": "",
-			"5": "",
-			"active": "",
-			"default": ""
-		},
+		"format": "{id}",
+		"on-scroll-up": "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e+1' })\"",
+		"on-scroll-down": "hyprctl dispatch \"hl.dsp.focus({ workspace = 'e-1' })\"",
+		"on-click-window": "hyprctl dispatch \"hl.dsp.focus({ workspace = '{address}' })\"",
 		"persistent_workspaces": {
 			"*": 1
 		}
+	},
+	"custom/separator": {
+		"format": "|"
 	},
 	"hyprland/window": {
 		"format": "{}"
@@ -40,15 +41,8 @@
 		"spacing": 10
 	},
 	"clock": {
-		"format": " {:%H:%M  %a, %b %e}",
+		"format": "{:%a, %b %e | %H:%M}",
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>"
-	},
-	"backlight": {
-		"device": "intel_backlight",
-		"format": "{icon} {percent}%",
-		"format-icons": ["󰃞", "󰃟", "󰃠"],
-		"on-scroll-up": "brightnessctl -q set 1%+",
-		"on-scroll-down": "brightnessctl -q set 1%-"
 	},
 	"battery": {
 		"states": {
@@ -66,9 +60,9 @@
 		"format": "{icon} {volume}%",
 		"tooltip": false,
 		"format-muted": " Muted",
-		"on-click": "pamixer -t",
-		"on-scroll-up": "pamixer -i 5",
-		"on-scroll-down": "pamixer -d 5",
+		"on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+		"on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+",
+		"on-scroll-down": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%-",
 		"scroll-step": 100,
 		"format-icons": {
 			"headphone": "",
@@ -79,15 +73,6 @@
 			"car": "",
 			"default": ["", "", ""]
 		}
-	},
-	"pulseaudio#microphone": {
-		"format": "{format_source}",
-		"format-source": " {volume}%",
-		"format-source-muted": " Muted",
-		"on-click": "pamixer --default-source -t",
-		"on-scroll-up": "pamixer --default-source -i 5",
-		"on-scroll-down": "pamixer --default-source -d 5",
-		"scroll-step": 5
 	},
 	"network": {
 		"format-wifi": "  {signalStrength}%",
@@ -104,5 +89,45 @@
 		"tooltip-format": "{device_alias}",
 		"tooltip-format-connected": " {device_enumerate}",
 		"tooltip-format-enumerate-connected": "{device_alias}"
+	},
+	"group/group-power": {
+		"orientation": "inherit",
+		"drawer": {
+			"transition-duration": 500,
+			"children-class": "not-power",
+			"transition-left-to-right": false
+		},
+		"modules": [
+			"custom/power", // First element is the "group leader" and won't ever be hidden
+			"custom/quit",
+			"custom/lock",
+			"custom/suspend",
+			"custom/reboot"
+		]
+	},
+	"custom/quit": {
+		"format": "󰗼",
+		"tooltip": false,
+		"on-click": "hyprctl dispatch exit"
+	},
+	"custom/lock": {
+		"format": "󰍁",
+		"tooltip": false,
+		"on-click": "swaylock"
+	},
+	"custom/reboot": {
+		"format": "󰜉",
+		"tooltip": false,
+		"on-click": "reboot"
+	},
+	"custom/suspend": {
+		"format": "",
+		"tooltip": false,
+		"on-click": "systemctl suspend"
+	},
+	"custom/power": {
+		"format": "",
+		"tooltip": false,
+		"on-click": "shutdown now"
 	}
 }
