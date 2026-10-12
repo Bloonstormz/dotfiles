@@ -34,6 +34,8 @@ alias sudop='sudo env PATH="$PATH"'
 
 alias dirsize='ls -A | xargs du -hs | sort -h'
 
+alias nmtui='NEWT_COLORS=$(<~/.config/nmtui/palette) nmtui'
+
 man() {
     local width=${MANWIDTH:-$((COLUMNS - 4))}
     if command man -O width=$COLUMNS man &>/dev/null; then
