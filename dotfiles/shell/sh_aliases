@@ -35,6 +35,7 @@ alias sudop='sudo env PATH="$PATH"'
 alias dirsize='ls -A | xargs du -hs | sort -h'
 
 alias nmtui='NEWT_COLORS=$(<~/.config/nmtui/palette) nmtui'
+alias udocker='DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock docker'
 
 man() {
     local width=${MANWIDTH:-$((COLUMNS - 4))}

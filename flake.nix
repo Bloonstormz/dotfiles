@@ -62,6 +62,7 @@
         modules = [
           ./nix/nixos/hosts/thinkpad.nix
           ./nix/nixos/configuration.nix
+          ./nix/nixos/modules/virtualisation.nix
           hjem.nixosModules.default
         ]
         ++ allPkgs;
