@@ -1,7 +1,7 @@
 -- Only run if noctalia is installed
 -- Updates associated defaults
 
-if io.popen("command -v noctalia"):read() ~= nil then
+if CommandExists("noctalia") then
 	Options.menu = "noctalia msg panel-toggle launcher"
 
 	Options.volumeDown = "noctalia msg volume-down 5"

@@ -1,3 +1,3 @@
-if io.popen("command -v wofi"):read() ~= nil then
+if CommandExists("wofi") then
 	Options.menu = "wofi --show drun"
 end
