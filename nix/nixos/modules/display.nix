@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  inputs,
   ...
 }:
 
@@ -45,6 +46,8 @@ in
     waybar
     waybar_auto_hide
     wofi
+    hyprcursor
+    inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default
   ];
 
   fonts.packages = with pkgs; [

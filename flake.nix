@@ -8,6 +8,11 @@
       url = "github:feel-co/hjem";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    rose-pine-hyprcursor = {
+      url = "github:ndom91/rose-pine-hyprcursor";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -15,7 +20,8 @@
       self,
       nixpkgs,
       hjem,
-    }:
+      ...
+    }@inputs:
     let
       supportedSystems = [
         "x86_64-linux"
@@ -59,6 +65,7 @@
 
       nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
         modules = [
           ./nix/nixos/hosts/thinkpad.nix
           ./nix/nixos/configuration.nix
