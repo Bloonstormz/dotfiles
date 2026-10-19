@@ -59,6 +59,7 @@ in
       xdg.config.files = {
         hypr.source = ../../../dotfiles/hypr;
         waybar.source = ../../../dotfiles/waybar;
+        wofi.source = ../../../dotfiles/wofi;
       };
     };
   };

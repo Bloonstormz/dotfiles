@@ -44,6 +44,7 @@ Options = {
 
 require("./optional/noctalia.lua")
 require("./optional/waybar.lua")
+require("./optional/wofi.lua")
 
 require("./autostart.lua")
 
