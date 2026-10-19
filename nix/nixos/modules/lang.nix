@@ -11,5 +11,6 @@
     cargo
 
     nodejs_24
+    pnpm
   ];
 }
