@@ -15,7 +15,7 @@
   ];
 
   hjem = {
-    users = config.forEachUser {
+    users = config.forMyUser {
       xdg.config.files = {
         nvim.source = ../../../dotfiles/nvim;
       };

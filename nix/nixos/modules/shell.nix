@@ -18,7 +18,7 @@
   };
 
   hjem = {
-    users = config.forEachUser {
+    users = config.forMyUser {
       files = {
         ".bash_profile".source = ../../../dotfiles/bash/bash_profile;
         ".bashrc".source = ../../../dotfiles/bash/bashrc;

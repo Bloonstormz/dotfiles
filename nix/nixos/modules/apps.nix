@@ -8,7 +8,7 @@
   ];
 
   hjem = {
-    users = config.forEachUser {
+    users = config.forMyUser {
       xdg.config.files = {
         ghostty.source = ../../../dotfiles/ghostty;
       };

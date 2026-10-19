@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   ...
@@ -6,7 +7,7 @@
 
 {
   options = {
-    forEachUser = lib.mkOption {
+    forMyUser = lib.mkOption {
     };
   };
 
@@ -18,7 +19,7 @@
   ];
 
   config = {
-    forEachUser = setting: {
+    forMyUser = setting: {
       minng01 = setting;
     };
 
@@ -33,13 +34,19 @@
       nix-ld.enable = true;
     };
 
-    users.users.minng01 = {
+    users.users = config.forMyUser {
       isNormalUser = true;
       extraGroups = [
         "wheel"
         "networkmanager"
       ];
       shell = pkgs.zsh;
+    };
+
+    hjem.users = config.forMyUser {
+      xdg.config.files = {
+        pictures.source = ../../dotfiles/pictures;
+      };
     };
 
     environment.systemPackages = with pkgs; [

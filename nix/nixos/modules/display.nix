@@ -55,7 +55,7 @@ in
   services.displayManager.ly.enable = true;
 
   hjem = {
-    users = config.forEachUser {
+    users = config.forMyUser {
       xdg.config.files = {
         hypr.source = ../../../dotfiles/hypr;
         waybar.source = ../../../dotfiles/waybar;

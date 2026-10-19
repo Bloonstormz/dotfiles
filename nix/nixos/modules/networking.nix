@@ -9,7 +9,7 @@
   };
 
   hjem = {
-    users = config.forEachUser {
+    users = config.forMyUser {
       xdg.config.files = {
         nmtui.source = ../../../dotfiles/nmtui;
       };

@@ -23,7 +23,7 @@
   ];
 
   hjem = {
-    users = config.forEachUser {
+    users = config.forMyUser {
       files = {
         ".gitconfig".source = ../../../dotfiles/git/gitconfig;
         ".tmux.conf".source = ../../../dotfiles/tmux/tmux.conf;
