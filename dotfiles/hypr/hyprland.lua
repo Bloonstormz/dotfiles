@@ -40,15 +40,18 @@ Options = {
 
 	brightnessDown = "brightnessctl -e4 -n2 set 5%-",
 	brightnessUp = "brightnessctl -e4 -n2 set 5%+",
+
+	autoStart = {
+		"hypridle",
+		"hyprpaper",
+	},
 }
 
 function CommandExists(command)
 	return io.popen("command -v " .. command):read() ~= nil
 end
 
-require("./optional/noctalia.lua")
-require("./optional/waybar.lua")
-require("./optional/wofi.lua")
+require("./optional/*")
 
 require("./autostart.lua")
 

@@ -1,7 +1,8 @@
 hl.on("hyprland.start", function()
-	hl.exec_cmd("hypridle")
-	hl.exec_cmd("hyprpaper")
-	hl.exec_cmd("hyprsunset")
+	for _, value in ipairs(Options.autoStart) do
+		hl.exec_cmd(value)
+	end
+
 	hl.exec_cmd(Options.terminal)
 	hl.exec_cmd(Options.browser, {
 		workspace = "2",

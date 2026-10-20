@@ -13,6 +13,10 @@
       url = "github:ndom91/rose-pine-hyprcursor";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    snappy-switcher = {
+      url = "github:OpalAayan/snappy-switcher";
+    };
   };
 
   outputs =
