@@ -43,15 +43,13 @@ man() {
     fi
 }
 
-_get_shell() {
-    if [ -n "$ZSH_VERSION" ]; then
-        echo "zsh"
-    elif [ -n "$BASH_VERSION" ]; then
-        echo "bash"
-    else
-        echo "sh"
-    fi
-}
+if [ -n "$ZSH_VERSION" ]; then
+    _CUR_SHELL="zsh"
+elif [ -n "$BASH_VERSION" ]; then
+    _CUR_SHELL="bash"
+else
+    _CUR_SHELL="sh"
+fi
 _command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
@@ -64,11 +62,19 @@ rgd() {
 }
 
 re_source() {
-    . "$HOME/.$(_get_shell)rc"
+    . "$HOME/.${_CUR_SHELL}rc"
 }
 
 if _command_exists pay-respects; then
-    eval "$(pay-respects "$(_get_shell)" --alias)"
+    eval "$(pay-respects "${_CUR_SHELL}" --alias)"
+    export _PR_PACKAGE_MANAGER="" # Don't search for command via package manager
+    if [ "$_CUR_SHELL" = "zsh" ]; then
+        # Workaround for p10k integration causing a "__pr_base:1: bad substitution"
+        # Not needed after a pay-respects has a release >0.8.8
+        __pr_base() {
+            _PR_MODE="$1" _PR_PREFIX="> " _PR_LAST_COMMAND="$2" _PR_ALIAS="$(alias)" _PR_SHELL="zsh" "pay-respects"
+        }
+    fi
 fi
 if _command_exists yazi; then
     yz() {
@@ -81,7 +87,7 @@ if _command_exists yazi; then
     }
 fi
 if _command_exists fzf; then
-    eval "$(command fzf --"$(_get_shell)")"
+    eval "$(command fzf --"${_CUR_SHELL}")"
     fzf() {
         if ! [[ -t 0 ]]; then
             # TODO: Find a way to make this wrapper work with the pipe
@@ -120,3 +126,5 @@ if _command_exists fzf; then
 fi
 
 [ -e "$HOME/.config/.local_aliases" ] && . "$HOME/.config/.local_aliases"
+unset _CUR_SHELL
+unset -f _command_exists
