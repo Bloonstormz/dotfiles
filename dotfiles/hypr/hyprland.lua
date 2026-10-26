@@ -53,7 +53,9 @@ end
 
 require("./optional/*")
 
-require("./autostart.lua")
+require("./autostart")
+
+require("./events")
 
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
