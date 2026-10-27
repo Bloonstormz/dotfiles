@@ -52,6 +52,8 @@
     environment.systemPackages = with pkgs; [
       nerd-fonts.jetbrains-mono
       fastfetch
+      nix-search
+      nix-index
     ];
 
     time.timeZone = "Europe/London";
