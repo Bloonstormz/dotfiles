@@ -4,11 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    hjem = {
-      url = "github:feel-co/hjem";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     rose-pine-hyprcursor = {
       url = "github:ndom91/rose-pine-hyprcursor";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,11 +15,9 @@
   };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      hjem,
-      ...
+    { self
+    , nixpkgs
+    , ...
     }@inputs:
     let
       supportedSystems = [
@@ -33,7 +26,6 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       declarePkg = import ./nix/lib/declarePkg.nix;
-      declareHjem = import ./nix/lib/declareHjem.nix;
 
       devPkgs = [
         (./nix/nixos/modules/shell.nix)
@@ -62,11 +54,6 @@
         default = self.packages.${system}.dev;
       });
 
-      hjemConfigurations = {
-        dev = declareHjem devPkgs;
-        all = declareHjem allPkgs;
-      };
-
       nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
@@ -74,7 +61,6 @@
           ./nix/nixos/hosts/thinkpad.nix
           ./nix/nixos/configuration.nix
           ./nix/nixos/modules/virtualisation.nix
-          hjem.nixosModules.default
         ]
         ++ allPkgs;
       };

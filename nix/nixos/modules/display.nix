@@ -1,8 +1,7 @@
-{
-  pkgs,
-  config,
-  inputs,
-  ...
+{ pkgs
+, config
+, inputs
+, ...
 }:
 
 let
@@ -57,14 +56,4 @@ in
   ];
 
   services.displayManager.ly.enable = true;
-
-  hjem = {
-    users = config.forMyUser {
-      xdg.config.files = {
-        hypr.source = ../../../dotfiles/hypr;
-        waybar.source = ../../../dotfiles/waybar;
-        wofi.source = ../../../dotfiles/wofi;
-      };
-    };
-  };
 }
