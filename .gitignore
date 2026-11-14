@@ -3,3 +3,4 @@
 downloads/
 dotfiles/**/*local*
 result
+.config

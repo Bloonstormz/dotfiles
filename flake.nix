@@ -20,13 +20,6 @@
     , ...
     }@inputs:
     let
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-      ];
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      declarePkg = import ./nix/lib/declarePkg.nix;
-
       devPkgs = [
         (./nix/nixos/modules/shell.nix)
         (./nix/nixos/modules/editor.nix)
@@ -35,25 +28,8 @@
       allPkgs = devPkgs ++ [
         (./nix/nixos/modules/apps.nix)
       ];
-
-      mkProfile =
-        system: name: modulePaths:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
-        pkgs.buildEnv {
-          inherit name;
-          paths = declarePkg pkgs modulePaths;
-          extraOutputsToInstall = [ "man" ];
-        };
     in
     {
-      packages = forAllSystems (system: {
-        dev = mkProfile system "dev" devPkgs;
-        all = mkProfile system "all" allPkgs;
-        default = self.packages.${system}.dev;
-      });
-
       nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
