@@ -5,6 +5,11 @@ export PATH
 _add_path() {
 	local target="$1"
 	local to_add="$2"
+
+	if ! [[ -e "$to_add" ]]; then
+		return 0
+	fi
+
 	local cur_val
 	eval "cur_val=\"\${$target}\""
 
