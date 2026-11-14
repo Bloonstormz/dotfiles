@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import curses
+import itertools
 import os
 import pathlib
 import subprocess
 import sys
 from enum import Enum
+from typing import Any
 
 if os.name == "nt":
     print("Not runnable on Windows!")
@@ -38,10 +40,16 @@ class Config:
 
         for package_list in self._config.values():
             for package in package_list:
-                if package.install == Action.HOST_DOWNLOAD:
-                    host_install.append(package.host_name)
-                elif package.install == Action.NIX_DOWNLOAD:
-                    nix_install.append(package.nix_name)
+                if package.install in WILL_INSTALL:
+                    if package.package_configs:
+                        for config in package.package_configs:
+                            res.append(f"CFG_{config.name}={config.chosen}")
+                    res.append(f"BIN_{package.name}=True")
+
+                    if package.install == Action.HOST_DOWNLOAD:
+                        host_install.append(package.host_name)
+                    elif package.install == Action.NIX_DOWNLOAD:
+                        nix_install.append(package.nix_name)
 
         res.append(f"HOST_INSTALL=( {' '.join(f'"{pkg}"' for pkg in host_install)} )")
         res.append(f"NIX_INSTALL=( {' '.join(f'"{pkg}"' for pkg in nix_install)} )")
@@ -62,6 +70,8 @@ class Package:
     nix_name: str
     host_name: str
 
+    package_configs: list[PackageConfig]
+
     def __init__(
         self,
         name: str,
@@ -72,6 +82,7 @@ class Package:
         binary: str | None = None,
         allow_host: bool = True,
         default_install: bool = True,
+        package_configs: list[PackageConfig] | None = None,
     ) -> None:
         self.name = name
         self.depends = depends_on if depends_on is not None else []
@@ -97,6 +108,8 @@ class Package:
         else:
             self.install = Action.IGNORE
 
+        self.package_configs = [] if package_configs is None else package_configs
+
     def set_action(self, action: Action) -> bool:
         if (
             action == Action.HOST_DOWNLOAD
@@ -117,6 +130,26 @@ class Package:
             options.append(Action.NIX_DOWNLOAD)
         self.install = options[(options.index(self.install) + 1) % len(options)]
 
+class HostPackage(Package):
+    def __init__(self, name: str, **opts) -> None:
+        maybe_set_dict(opts, "default_install", False)
+        maybe_set_dict(opts, "allow_nix", False)
+        super().__init__(name, **opts)
+
+
+class PackageConfig:
+    name: str
+    choices: list[str]
+    display_name: str
+
+    chosen: str
+
+    def __init__(self, name: str, choices: list[str], display_name: str|None = None) -> None:
+        self.name = name
+        self.choices = choices
+        self.display_name = display_name if display_name is not None else name
+
+        self.chosen = choices[0]
 
 def command_exists(command: str) -> bool:
     return not subprocess.run(
@@ -139,6 +172,10 @@ elif command_exists("nixos-rebuild"):
 else:
     raise NotImplementedError("Unsupported Host")
 
+def maybe_set_dict(dict: dict[str, Any], key: str, value: Any):
+    if key not in dict:
+        dict[key] = value
+
 
 def create_packages(package_names: list[str | Package], **opts) -> list[Package]:
     res: list[Package] = []
@@ -157,6 +194,14 @@ p10k = Package(
     "powerlevel10k", allow_host=False, depends_on=[zsh], nix_name="zsh-powerlevel10k"
 )
 payRespects = Package("pay-respects", allow_host=False)
+
+# Display Packages
+niri = HostPackage("niri")
+waybar = HostPackage("waybar", package_configs=[
+    PackageConfig("WAYBAR_THEME", ["Light", "Dark"], "Theme")
+])
+
+swaync = HostPackage("Sway Notification Centre", void_name="SwayNotificationCenter", binary="swaync")
 
 Install_Config = Config(
     {
@@ -177,6 +222,9 @@ Install_Config = Config(
         ),
         "Apps": create_packages(["firefox", "ghostty"], default_install=False),
         "Editors": create_packages([Package("neovim", binary="nvim")]),
+        "Display": [
+            niri, waybar, swaync
+        ],
     }
 )
 
@@ -223,15 +271,19 @@ def display(_win: curses.window):
     scroll = 0
 
     def rows():
-        result: list[tuple[str, str, Package | None]] = []
+        result: list[tuple[str, str, Package | PackageConfig | None]] = []
         for category, packages in Install_Config._config.items():
             result.append(("category", category, None))
             if category not in collapsed:
-                result.extend(
-                    ("package", category, package)
-                    for package in packages
-                    if package.install != Action.DISABLED and can_install(package)
-                )
+                for package in packages:
+                    if package.install == Action.DISABLED or not can_install(package):
+                        continue
+                    result.append(("package", category, package))
+                    if package.install in WILL_INSTALL:
+                        result.extend(
+                            ("config", category, config)
+                            for config in package.package_configs
+                        )
         return result
 
     def can_install(package: Package) -> bool:
@@ -246,7 +298,7 @@ def display(_win: curses.window):
             win.addnstr(
                 0,
                 0,
-                "Package configuration  ↑/↓ move  ←/→ scroll  Space toggle  q quit",
+                "Package configuration  ↑/↓ move  Space select  ←/→ change value  q save",
                 max(0, width - 1),
                 curses.A_BOLD,
             )
@@ -269,8 +321,8 @@ def display(_win: curses.window):
                     marker = "+" if label in collapsed else "-"
                     text = f"{marker} {label}"
                     attr |= curses.A_BOLD
-                else:
-                    assert package is not None
+                elif kind == "package":
+                    assert isinstance(package, Package)
                     if package.install == Action.HOST_DOWNLOAD:
                         status = "H"
                         extra = " (Host Installation)"
@@ -281,13 +333,16 @@ def display(_win: curses.window):
                         status = " "
                         extra = ""
                     text = f"    [{status}] {package.name}{extra}"
+                else:
+                    assert isinstance(package, PackageConfig)
+                    text = f"        {package.display_name}: {package.chosen}"
                 win.addnstr(screen_row, 0, text, max(0, width - 1), attr)
 
             if height > 1:
                 win.addnstr(
                     height - 1,
                     0,
-                    "Space/Enter: collapse category or toggle package | q: save choices and quit",
+                    "Space: toggle package/category or choose config | ←/→: change config | q: save and quit",
                     max(0, width - 1),
                 )
             win.refresh()
@@ -311,21 +366,31 @@ def display(_win: curses.window):
         elif key == curses.KEY_NPAGE:
             selected = min(max(0, len(rows()) - 1), selected + max(1, height - 2))
         elif key in (curses.KEY_LEFT, curses.KEY_RIGHT):
-            scroll = max(0, scroll + (-1 if key == curses.KEY_LEFT else 1))
+            visible_rows = rows()
+            if visible_rows:
+                kind, _, item = visible_rows[selected]
+                if kind == "config" and isinstance(item, PackageConfig):
+                    current = item.choices.index(item.chosen)
+                    delta = -1 if key == curses.KEY_LEFT else 1
+                    item.chosen = item.choices[(current + delta) % len(item.choices)]
         elif key in (" ", "\n", "\r", curses.KEY_ENTER, "h", "H", "n", "N", "d", "D"):
             visible_rows = rows()
             if not visible_rows:
                 continue
             kind, label, package = visible_rows[selected]
 
-            if key in ("h", "H"):
-                if package is not None and package.allow_host:
+            if kind == "config":
+                if isinstance(package, PackageConfig):
+                    current = package.choices.index(package.chosen)
+                    package.chosen = package.choices[(current + 1) % len(package.choices)]
+            elif key in ("h", "H"):
+                if isinstance(package, Package) and package.allow_host:
                     package.install = Action.HOST_DOWNLOAD
             elif key in ("n", "N"):
-                if package is not None and package.allow_nix:
+                if isinstance(package, Package) and package.allow_nix:
                     package.install = Action.NIX_DOWNLOAD
             elif key in ("d", "D"):
-                if package is not None:
+                if isinstance(package, Package):
                     package.install = Action.IGNORE
             else:
                 if kind == "category":
@@ -333,7 +398,7 @@ def display(_win: curses.window):
                         collapsed.remove(label)
                     else:
                         collapsed.add(label)
-                elif package is not None:
+                elif isinstance(package, Package):
                     package.cycle_action()
 
     return 1
