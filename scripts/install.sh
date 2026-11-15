@@ -43,9 +43,10 @@ fi
 # Non nix-os based distros.
 # Prompt for certain settings and form a nix profile install <...> command accordingly
 
+SKIP_NIX=false
 if [[ -e "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/profile" ]] && ! [[ -z "$(nix profile list)" ]]; then
 	while true; do
-		printf "Nix profile already found! (d)elete or (A)dd onto it? "
+		printf "Nix profile already found! (d)elete, (A)dd onto it or (s)kip nix installs? "
 		read -r reply || true
 		case "${reply,,}" in
 		d | delete)
@@ -53,6 +54,10 @@ if [[ -e "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/profile" ]] && ! [[
 			break
 			;;
 		"" | a | add)
+			break
+			;;
+		s | skip)
+			SKIP_NIX=true
 			break
 			;;
 		*)
@@ -78,7 +83,7 @@ if [[ "${#HOST_INSTALL[@]}" -gt 0 ]]; then
 	fi
 fi
 
-if [[ "${#NIX_INSTALL[@]}" -gt 0 ]]; then
+if [[ "${#NIX_INSTALL[@]}" -gt 0 && "$SKIP_NIX" == false ]]; then
 	if command -v jq &>/dev/null; then
 		nixrev="$(jq -r .nodes.nixpkgs.locked.rev "$REPO_ROOT/flake.lock")"
 	else
