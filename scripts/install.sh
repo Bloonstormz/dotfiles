@@ -15,6 +15,10 @@ while [[ "$#" -gt 0 ]]; do
 	-c | --config)
 		CONFIGURE=true
 		;;
+	-n | --nix)
+		reply="$1"
+		shift
+		;;
 	esac
 done
 
@@ -46,8 +50,10 @@ fi
 SKIP_NIX=false
 if [[ -e "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/profile" ]] && ! [[ -z "$(nix profile list)" ]]; then
 	while true; do
-		printf "Nix profile already found! (d)elete, (A)dd onto it or (s)kip nix installs? "
-		read -r reply || true
+		if ! [[ -v reply ]]; then
+			printf "Nix profile already found! (d)elete, (A)dd onto it or (s)kip nix installs? "
+			read -r reply || true
+		fi
 		case "${reply,,}" in
 		d | delete)
 			nix profile remove --all
@@ -64,6 +70,7 @@ if [[ -e "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/profile" ]] && ! [[
 			echo "Unrecognized Option: '${reply}'" >&2
 			;;
 		esac
+		unset reply
 	done
 fi
 
