@@ -232,7 +232,7 @@ payRespects = Package("pay-respects", allow_host=False)
 niri = HostPackage("niri", package_configs=[
     PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")
 ])
-waybar = HostPackage("waybar")
+waybar = HostPackage("waybar", void_name="Waybar")
 
 # Launchers
 wofi = HostPackage("wofi")

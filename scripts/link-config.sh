@@ -58,6 +58,7 @@ link() {
 	if ! [[ -e "$source" ]]; then
 		return 0
 	fi
+
 	if [[ -L "$destination" ]] &&
 		[[ "$(realpath -- "$destination")" == "$(realpath -- "$source")" ]]; then
 		return 0
@@ -87,6 +88,7 @@ link() {
 }
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
+source "$REPO_ROOT/.config"
 for package in "${packages[@]}"; do
 	if [[ -f "${package}/link.sh" ]]; then
 		# shellcheck disable=SC1091

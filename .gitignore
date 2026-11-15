@@ -2,5 +2,6 @@
 .venv/
 downloads/
 dotfiles/**/*local*
+dotfiles/waybar/colours/colours.css
 result
 .config
