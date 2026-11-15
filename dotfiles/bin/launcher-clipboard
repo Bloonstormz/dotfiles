@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [[ "$#" -lt 1 ]]; then
+    exit 1
+fi
+
+SELECTION=$(
+    cliphist list | "$@"
+)
+
+RET=$?
+
+if [[ $RET == 1 ]]; then
+    exit 1
+fi
+
+echo "$SELECTION" | cliphist decode | wl-copy
+
+if [[ $RET == 10 ]]; then
+    # Paste directly if shift + enter
+    wl-paste -n | wtype -
+fi

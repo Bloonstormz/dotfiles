@@ -3,5 +3,6 @@
 downloads/
 dotfiles/**/*local*
 dotfiles/waybar/colours/colours.css
+dotfiles/rofi/themes/colours/colours.rasi
 result
 .config

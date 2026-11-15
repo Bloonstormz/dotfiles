@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+#
+# A script to toggle rofi based menus. Will execute passed arguments
+# If rofi is not running. Else, will kill it
+
+if [ "$#" -lt 1 ]; then
+    exit 1
+fi
+
+SCRIPT=$(realpath "$0")
+ARGS="$*"
+
+LAUNCHERS=("rofi", "wofi")
+for l in "${LAUNCHERS[@]}"; do
+    if command -v "$l" &>/dev/null; then
+        launcher="$l"
+        break
+    fi
+done
+
+if ! [[ -v launcher ]]; then
+    exit 1
+fi
+
+if pgrep -af "/bin/bash $SCRIPT" | grep -v "$ARGS"$; then
+    pkill -x $launcher
+elif pgrep -x $launcher >/dev/null; then
+    pkill -x $launcher
+    exit 0
+fi
+
+ARG="$1"
+shift
+
+# TODO: Better wofi styling
+case "$ARG" in
+drun)
+    case "$launcher" in
+    rofi)
+        rofi -theme "$HOME/.config/rofi/themes/launcher.rasi" \
+            -show drun \
+            -theme-str 'entry { placeholder: "Search..."; }' \
+            -modi "drun,run,filebrowser" \
+            -display-drun "" \
+            -display-run "" \
+            -display-filebrowser "󰉋"
+        ;;
+    wofi)
+        wofi --show drun
+        ;;
+    esac
+    ;;
+run)
+    case "$launcher" in
+    rofi)
+        rofi -theme ~/.config/rofi/themes/launcher.rasi \
+            -theme-str 'mainbox {children: [ "inputbar", "message", "listview"];}' \
+            -theme-str 'entry { placeholder: "Run command..."; }' \
+            -no-show-icons \
+            -run-shell-command "{terminal} -e {cmd}" \
+            -run-command "{cmd}" \
+            -modi run -show run
+        ;;
+    wofi)
+        # TODO: Add wofi support for this
+        exit 1
+        ;;
+    esac
+    ;;
+logout)
+    "$HOME/.config/bin/launcher-logout" "$launcher"
+    ;;
+clipboard)
+    case "$launcher" in
+    rofi)
+        "$HOME/.config/bin/launcher-clipboard" \
+            rofi -theme ~/.config/rofi/themes/clipboard.rasi \
+            -dmenu -sync -display-columns 2 \
+            -kb-accept-alt "" -kb-custom-1 "Shift+Return"
+        ;;
+    wofi)
+        "$HOME/.config/bin/launcher-clipboard" \
+            wofi --dmenu
+        ;;
+    esac
+    ;;
+*)
+    "$ARG" "$@"
+    ;;
+esac

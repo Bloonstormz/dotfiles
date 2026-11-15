@@ -6,6 +6,10 @@ My dotfiles/nix OS configurations with a customizable install script to *roughly
 
 - Linux
 
+> [!NOTE]
+> Some of the dotfiles for desktop environment related programs assume you are running Wayland.
+> Some tinkering may be required if you use x11
+
 ## Configuring/Installation
 
 Allows choosing which programs to install (and then installs them)
@@ -34,4 +38,4 @@ If you don't want to use my dotfiles anymore run `./scripts/unlink-config.sh`
 
 # Credits
 
-Waybar theme and associated scripts in `dotfiles/bin` are taken from https://github.com/cebem1nt/dotfiles/tree/c0c1ae5
+Waybar theme and rofi configs are adapted from https://github.com/cebem1nt/dotfiles/tree/c0c1ae5

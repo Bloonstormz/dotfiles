@@ -235,9 +235,8 @@ niri = HostPackage("niri", package_configs=[
 waybar = HostPackage("waybar", void_name="Waybar")
 
 # Launchers
+rofi = HostPackage("rofi")
 wofi = HostPackage("wofi")
-walker = HostPackage("walker")
-
 
 swaync = HostPackage("Sway Notification Centre", void_name="SwayNotificationCenter", binary="swaync")
 
@@ -263,6 +262,9 @@ Install_Config = Config(
         "Display": [
             niri, waybar, swaync
         ],
+        "Launchers": [
+            rofi, wofi
+        ]
     }
 )
 
