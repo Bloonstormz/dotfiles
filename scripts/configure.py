@@ -93,7 +93,8 @@ class Config:
 
 
 class Package:
-    name: str
+    name: str # Internal identifier - Must be a valid bash variable name
+    display_name: str # Name shown to user - any valid string
     depends: list[Package]
 
     install: Action
@@ -109,15 +110,19 @@ class Package:
         self,
         name: str,
         depends_on: list[Package] | None = None,
-        allow_nix: bool = True,
+
         nix_name: str | None = None,
         void_name: str | None = None,
         binary: str | None = None,
+        display_name: str | None = None,
+
+        allow_nix: bool = True,
         allow_host: bool = True,
         default_install: bool = True,
         package_configs: list[PackageConfig] | None = None,
     ) -> None:
         self.name = name.replace(" ", "_").replace("-", "_")
+        self.display_name = name if display_name is None else display_name
         self.depends = depends_on if depends_on is not None else []
         self.allow_nix = allow_nix
         self.allow_host = allow_host
@@ -222,11 +227,11 @@ def create_packages(package_names: list[str | Package], **opts) -> list[Package]
 
 
 zsh = Package("zsh")
-omz = Package("oh-my-zsh", allow_host=False, depends_on=[zsh])
+omz = Package("oh_my_zsh", allow_host=False, depends_on=[zsh], display_name="Oh My Zsh", nix_name="oh-my-zsh")
 p10k = Package(
     "powerlevel10k", allow_host=False, depends_on=[zsh], nix_name="zsh-powerlevel10k"
 )
-payRespects = Package("pay-respects", allow_host=False)
+payRespects = Package("pay_respects", allow_host=False, display_name="Pay Respects", nix_name="pay-respects")
 
 # Display Packages
 niri = HostPackage("niri", package_configs=[
@@ -240,7 +245,7 @@ wofi = HostPackage("wofi")
 
 # Notifications
 
-swaync = HostPackage("Sway Notification Centre", void_name="SwayNotificationCenter", binary="swaync")
+swaync = HostPackage("Sway_Notification_Centre", void_name="SwayNotificationCenter", binary="swaync", display_name="Sway Notification Centre")
 
 Install_Config = Config(
     {
@@ -270,6 +275,9 @@ Install_Config = Config(
         "Idle": [
             HostPackage("hypridle"),
             HostPackage("hyprlock")
+        ],
+        "Wallpapers": [
+            HostPackage("awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)", binary="awww", void_name="awww", nix_name="awww")
         ]
     }
 )
@@ -378,7 +386,7 @@ def display(_win: curses.window):
                     else:
                         status = " "
                         extra = ""
-                    text = f"    [{status}] {package.name.replace("_", " ")}{extra}"
+                    text = f"    [{status}] {package.display_name}{extra}"
                 else:
                     assert isinstance(package, PackageConfig)
                     text = f"        {package.display_name}: {package.chosen}"

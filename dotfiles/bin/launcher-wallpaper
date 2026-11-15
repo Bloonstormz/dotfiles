@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+if [[ "$#" -lt 1 ]]; then
+	exit 1
+fi
+if ! [[ -d "$HOME/.config/Wallpapers" ]]; then
+	exit 1
+fi
+if ! command -v awww &>/dev/null; then
+	exit 1
+fi
+
+mapfile -t WALLPAPER_PATHS < <(
+	find -L "$(realpath "$HOME/.config/Wallpapers")" -mindepth 1 -maxdepth 1 -type f | sort
+)
+if [[ "${#WALLPAPER_PATHS[@]}" -eq 0 || -z "${#WALLPAPER_PATHS[0]}" ]]; then
+	exit 1
+fi
+
+launcher="$1"
+shift
+
+format_dmenu() {
+	local image_first=false
+	if [[ "$#" -ne 1 ]] && [[ "$2" == "-i" ]]; then
+		image_first=true
+	fi
+	for i in "${!WALLPAPER_THUMBNAILS[@]}"; do
+		if [[ "$image_first" == true ]]; then
+			printf "$1\n" "${WALLPAPER_THUMBNAILS[i]}" "${WALLPAPER_PATHS[i]}"
+		else
+			printf "$1\n" "${WALLPAPER_PATHS[i]}" "${WALLPAPER_THUMBNAILS[i]}"
+		fi
+	done
+}
+
+picker_rofi() {
+	if [[ "${#WALLPAPER_THUMBNAILS[@]}" -eq 0 ]]; then
+		printf "%s\n" "${WALLPAPER_PATHS[@]}" | rofi -dmenu -sync -theme "$HOME/.config/rofi/themes/wallpapers.rasi"
+	else
+		format_dmenu "%s\x00icon\x1f%s" | rofi -dmenu -sync -theme "$HOME/.config/rofi/themes/wallpapers.rasi"
+	fi
+}
+picker_wofi() {
+	wofi --dmenu
+	if [[ "${#WALLPAPER_THUMBNAILS[@]}" -eq 0 ]]; then
+		printf "%s\n" "${WALLPAPER_PATHS[@]}" | wofi --dmenu
+	else
+		format_dmenu "img:%s:text:%s" -i | wofi --dmenu
+	fi
+}
+
+pick_wallpaper() {
+	picker_"$launcher"
+}
+
+WALLPAPER_THUMBNAILS=()
+if command -v "ffmpeg" &>/dev/null; then
+	thumbnail_dir="$HOME/.cache/Wallpapers/thumbnails"
+	mkdir -p -- "$thumbnail_dir"
+	for wallpaper in "${WALLPAPER_PATHS[@]}"; do
+		path="$thumbnail_dir/$(basename "$wallpaper")"
+		if ! [[ -e "$path" ]]; then
+			ffmpeg -i "$wallpaper" "-vf" "scale='if(gt(iw,ih),500,-1)':'if(gt(iw,ih),-1,500)'" \
+				-frames:v 1 -q:v 5 -update 1 "$path"
+		fi
+		WALLPAPER_THUMBNAILS+=(
+			"$path"
+		)
+	done
+fi
+
+case "${1:-pick}" in
+set)
+	awww img "$2"
+	;;
+pick)
+	chosen="$(pick_wallpaper)"
+	[[ -e "$chosen" ]] && awww img "$chosen"
+	;;
+esac
