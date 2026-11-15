@@ -2,7 +2,8 @@
 .venv/
 downloads/
 dotfiles/**/*local*
-dotfiles/waybar/colours/colours.css
 dotfiles/rofi/themes/colours/colours.rasi
+dotfiles/swaync/colours/colours.css
+dotfiles/waybar/colours/colours.css
 result
 .config

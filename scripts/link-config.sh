@@ -119,3 +119,5 @@ for package in "${packages[@]}"; do
 	unset -v condition
 	unset -f run_link
 done
+
+link "$DOTFILES_ROOT/defaults" "$CONFIG/defaults"
