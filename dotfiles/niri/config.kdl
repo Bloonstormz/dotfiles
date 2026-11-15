@@ -1,0 +1,112 @@
+// Check the wiki for a full description of the configuration:
+//   https://yalter.github.io/niri/Configuration:-Introduction
+
+// ----------------------------------------------------------------------------
+// Launch at startup
+// ----------------------------------------------------------------------------
+
+include optional=true "optional/awww.kdl"
+include optional=true "optional/hypridle.kdl"
+include optional=true "optional/sway-nc.kdl"
+include optional=true "optional/waybar.kdl"
+
+// ----------------------------------------------------------------------------
+// Input devices (mouse, trackpad, keyboard, etc.)
+// ----------------------------------------------------------------------------
+
+input {
+    keyboard {
+        xkb {
+            layout "gb"
+            // Remap menu key to act as an extra super / mod key.
+            options "altwin:menu_win"
+        }
+
+        // A fairly fast repeat rate and delay.
+        repeat-delay 200
+        repeat-rate 20
+    }
+
+    touchpad {
+        // Tapping anywhere registers a left click.
+        tap
+
+        // Inverted scrolling.
+        natural-scroll
+
+        // Disable acceleration.
+        accel-profile "flat"
+    }
+
+    mouse {
+        // Disable acceleration.
+        accel-profile "flat"
+
+        // Faster scrolling with the mouse wheel.
+        scroll-factor 2.0
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Behaviors and aesthetics
+// ----------------------------------------------------------------------------
+
+// Avoid writing screenshots to disk since they get piped into satty.
+screenshot-path null
+
+hotkey-overlay {
+    // Avoid auto-showing the important hotkeys menu.
+    skip-at-startup
+}
+
+gestures {
+    // Disable overview when mousing over the top left of primary screen.
+    hot-corners {
+        off
+    }
+}
+
+// Remove window decorations (requires opening and closing each app to change).
+prefer-no-csd
+
+layout {
+    // Set gaps around windows in logical pixels.
+    gaps 8
+
+    focus-ring {
+        width 1
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Window / layer rules
+// ----------------------------------------------------------------------------
+
+window-rule {
+    // Slight rounded corners.
+    geometry-corner-radius 2
+    clip-to-geometry true
+    default-column-width { proportion 1.0; }
+}
+
+window-rule {
+    match app-id=r#"^KeePassXC$"#
+
+    block-out-from "screencast"
+}
+
+environment {
+    EDITOR "nvim"
+}
+
+include "floating.kdl"
+
+
+include "binds.kdl"
+
+// ----------------------------------------------------------------------------
+// Theme and personalized configs
+// ----------------------------------------------------------------------------
+
+include optional=true "theme.kdl"
+include optional=true "config.kdl.local"

@@ -1,1 +1,2 @@
-TERMINAL="ghostty"
+TERMINAL="nixGL ghostty"
+BROWSER="firefox"

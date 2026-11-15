@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
-if [[ "$#" -lt 1 ]]; then
-	exit 1
-fi
 if ! [[ -d "$HOME/.config/Wallpapers" ]]; then
 	exit 1
 fi
 if ! command -v awww &>/dev/null; then
 	exit 1
+fi
+if [[ "$#" -lt 1 ]]; then
+	launcher="$("$HOME/.config/bin/get_launcher")"
+else
+	launcher="$1"
+	shift
 fi
 
 mapfile -t WALLPAPER_PATHS < <(
@@ -16,9 +19,6 @@ mapfile -t WALLPAPER_PATHS < <(
 if [[ "${#WALLPAPER_PATHS[@]}" -eq 0 || -z "${#WALLPAPER_PATHS[0]}" ]]; then
 	exit 1
 fi
-
-launcher="$1"
-shift
 
 format_dmenu() {
 	local image_first=false

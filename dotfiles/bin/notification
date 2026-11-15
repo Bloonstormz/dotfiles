@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+sway_dismiss() {
+	swaync-client --close-latest
+}
+sway_dismiss_all() {
+	swaync-client --close-all
+}
+sway_view() {
+	swaync-client --toggle-panel
+}
+
+case "${1:-dismiss}" in
+"dismiss")
+	sway_dismiss
+	;;
+"dismiss-all")
+	sway_dismiss_all
+	;;
+"view")
+	sway_view
+	;;
+esac

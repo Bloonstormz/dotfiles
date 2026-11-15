@@ -3,14 +3,14 @@
 # A script to toggle rofi based menus. Will execute passed arguments
 # If rofi is not running. Else, will kill it
 
-if [ "$#" -lt 1 ]; then
-    exit 1
-fi
-
 SCRIPT=$(realpath "$0")
 ARGS="$*"
 
-LAUNCHERS=("rofi", "wofi")
+if [[ "$#" -lt 1 ]]; then
+    exit 1
+fi
+
+LAUNCHERS=("rofi" "wofi")
 for l in "${LAUNCHERS[@]}"; do
     if command -v "$l" &>/dev/null; then
         launcher="$l"

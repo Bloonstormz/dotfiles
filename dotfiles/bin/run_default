@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+source "$HOME/.config/defaults"
+
+type="$1"
+shift
+case "$type" in
+terminal)
+	exec $TERMINAL "$@"
+	;;
+browser)
+	exec $BROWSER "$@"
+	;;
+esac

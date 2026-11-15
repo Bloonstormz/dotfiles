@@ -84,7 +84,10 @@ link() {
 	relative_wd="$(realpath --relative-to="$REPO_ROOT" "$source")"
 	ln -s -- "$relative_source" "$destination"
 	printf 'Linked %s -> ./%s\n' "$destination" "$relative_wd"
+}
 
+command_exists() {
+	command -v "$1" &>/dev/null
 }
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"

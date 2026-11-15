@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if command -v rofi &>/dev/null; then
+	echo rofi
+elif command -v wofi &>/dev/null; then
+	echo wofi
+else
+	exit 1
+fi

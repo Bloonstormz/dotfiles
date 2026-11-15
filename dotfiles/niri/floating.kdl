@@ -1,0 +1,48 @@
+window-rule {
+    match app-id=r#"^Pinentry-gtk$"#
+    match app-id=r#"^Tk$"#
+    match app-id=r#"^gimp$"# title=r#"Preferences"#
+    match app-id=r#"^mpv$"#
+    match app-id=r#"^soffice$"# title=r#"^Text Import"#
+    match app-id=r#"^thunar$"# title=r#"^Rename "#
+    match app-id=r#"^virt-manager$"# title=r#" - Connection Details"#
+    match app-id=r#"^wev$"#
+    match app-id=r#"^xarchiver$"#
+    match app-id=r#"firefox$"# title=r#"^(Picture-in-Picture|Library|About Mozilla Firefox|Firefox - Choose a profile)$"#
+
+    open-floating true
+}
+
+window-rule {
+    match app-id=r#"^dfr\.floating\.[^.]*$"#
+
+    open-floating true
+    default-column-width { proportion 0.33; }
+    default-window-height { proportion 0.5; }
+}
+
+window-rule {
+    match app-id=r#"^com\.gabm\.satty$"#
+    open-floating true
+    min-width 730
+    min-height 300
+}
+
+window-rule {
+    match app-id=r#"^dev\.benz\.walker$"#
+    match app-id=r#"^dev\.benz\.walker$"#
+    open-floating true
+
+    focus-ring {
+        width 0
+    }
+}
+
+window-rule {
+    match app-id="dfr.ghostty.notes"
+
+    open-floating true
+    default-column-width { proportion 0.33; }
+    default-window-height { proportion 0.5; }
+}
+
