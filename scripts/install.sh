@@ -72,10 +72,33 @@ if [[ ! -e "$CONFIG_FILE" ]] || [[ "$CONFIGURE" == true ]]; then
 	"$SCRIPT_DIR/configure.py"
 fi
 
+will_install() {
+	for bin in "$@"; do
+		local -n config="BIN_$bin"
+		if [[ "${config}" == "host" || "${config}" == "nix" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
 source "$CONFIG_FILE"
 
 if [[ "${#HOST_INSTALL[@]}" -gt 0 ]]; then
 	if command -v xbps-install &>/dev/null; then
+		if will_install "hypridle" "hyprlock"; then
+			if ! grep -q "repository=https://mirror.black-hole.dev/$(xbps-uhelper arch)" /etc/xbps.d/00-repository-main.conf &>/dev/null; then
+				printf "${YELLOW}WARNING: Hypridle/Hyprlock requires a third-part repository:${NORMAL} ${BLUE}https://github.com/Event-Horizon-VL/blackhole-vl${NORMAL}\n"
+				printf "Proceed (y/N)? "
+				read -r confirm
+				if ! [[ "${confirm,,}" == "y" ]]; then
+					exit 1
+				fi
+				[[ -e /etc/xbps.d/00-repository-main.conf ]] || sudo cp /usr/share/xbps.d/00-repository-main.conf /etc/xbps.d/
+				echo "repository=https://mirror.black-hole.dev/$(xbps-uhelper arch)" | sudo tee -a /etc/xbps.d/00-repository-main.conf >/dev/null
+			fi
+		fi
+
 		printf "sudo xbps-install -S "
 		printf "%s " "${HOST_INSTALL[@]}"
 		printf "\n"

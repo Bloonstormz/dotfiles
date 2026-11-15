@@ -238,6 +238,8 @@ waybar = HostPackage("waybar", void_name="Waybar")
 rofi = HostPackage("rofi")
 wofi = HostPackage("wofi")
 
+# Notifications
+
 swaync = HostPackage("Sway Notification Centre", void_name="SwayNotificationCenter", binary="swaync")
 
 Install_Config = Config(
@@ -260,10 +262,14 @@ Install_Config = Config(
         "Apps": create_packages(["firefox", "ghostty"], default_install=False),
         "Editors": create_packages([Package("neovim", binary="nvim")]),
         "Display": [
-            niri, waybar, swaync
+            niri, waybar, swaync, 
         ],
         "Launchers": [
             rofi, wofi
+        ],
+        "Idle": [
+            HostPackage("hypridle"),
+            HostPackage("hyprlock")
         ]
     }
 )

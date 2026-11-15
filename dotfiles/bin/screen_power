@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+case "${1:-on}" in
+on)
+	if [[ -n "$NIRI_SOCKET" ]]; then
+		niri msg action power-on-monitors
+	fi
+	;;
+off)
+	if [[ -n "$NIRI_SOCKET" ]]; then
+		niri msg action power-off-monitors
+	fi
+	;;
+esac
