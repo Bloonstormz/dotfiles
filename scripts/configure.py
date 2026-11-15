@@ -6,6 +6,7 @@ import curses
 import itertools
 import os
 import pathlib
+import re
 import subprocess
 import sys
 from enum import Enum
@@ -26,37 +27,69 @@ class Action(Enum):
 
 WILL_INSTALL = (Action.HOST_DOWNLOAD, Action.NIX_DOWNLOAD)
 
+CFG_REGEX = re.compile(r'(?P<type>[^_]+)_(?P<name>[^=]+)=(?P<value>.*)$')
 
 class Config:
-    _config: dict[str, list[Package]]
+    config: dict[str, list[Package]]
+
+    all_packages: list[Package]
+    all_package_configs: list[PackageConfig]
 
     def __init__(self, config: dict[str, list[Package]]) -> None:
-        self._config = config
+        self.config = config
+
+        self.all_packages = list(itertools.chain(*self.config.values()))
+        self.all_package_configs = list(itertools.chain(*(pkg.package_configs for pkg in self.all_packages)))
 
     def write_config(self, file: pathlib.Path):
-        res: list[str] = []
+        res: list[str] = ["HOST_INSTALL=()", "NIX_INSTALL=()"]
         host_install: list[str] = []
         nix_install: list[str] = []
 
-        for package_list in self._config.values():
-            for package in package_list:
-                if package.install in WILL_INSTALL:
-                    if package.package_configs:
-                        for config in package.package_configs:
-                            res.append(f"CFG_{config.name}={config.chosen}")
-                    res.append(f"BIN_{package.name}=True")
+        for package in self.all_packages:
+            pkg_type="false"
+            if package.install in WILL_INSTALL:
+                if package.package_configs:
+                    for config in package.package_configs:
+                        res.append(f"CFG_{config.name}={config.chosen}")
 
-                    if package.install == Action.HOST_DOWNLOAD:
-                        host_install.append(package.host_name)
-                    elif package.install == Action.NIX_DOWNLOAD:
-                        nix_install.append(package.nix_name)
+                if package.install == Action.HOST_DOWNLOAD:
+                    host_install.append(package.host_name)
+                    pkg_type="host"
+                elif package.install == Action.NIX_DOWNLOAD:
+                    nix_install.append(package.nix_name)
+                    pkg_type="nix"
 
-        res.append(f"HOST_INSTALL=( {' '.join(f'"{pkg}"' for pkg in host_install)} )")
-        res.append(f"NIX_INSTALL=( {' '.join(f'"{pkg}"' for pkg in nix_install)} )")
+            res.append(f"BIN_{package.name}={pkg_type}")
 
-        print(f"Writing to: {file}")
+        res.append(f"HOST_INSTALL+=( {' '.join(f'"{pkg}"' for pkg in host_install)} )")
+        res.append(f"NIX_INSTALL+=( {' '.join(f'"{pkg}"' for pkg in nix_install)} )")
+
         with open(file, "w") as f:
             f.write("\n".join(res))
+
+    def load_config(self, file: pathlib.Path):
+        with open(file, "r") as f:
+            for line in f.readlines():
+                m = CFG_REGEX.match(line)
+                if m is None:
+                    continue
+                match m.group("type"):
+                    case "CFG":
+                        for pkg_cfg in self.all_package_configs:
+                            if pkg_cfg.name == m.group("name"):
+                                pkg_cfg.chosen = m.group("value")
+                    case "BIN":
+                        for pkg in self.all_packages:
+                            if pkg.install != Action.DISABLED and pkg.name == m.group("name"):
+                                match m.group("value"):
+                                    case "false":
+                                        pkg.install = Action.IGNORE
+                                    case "host":
+                                        pkg.install = Action.HOST_DOWNLOAD
+                                    case "nix":
+                                        pkg.install = Action.NIX_DOWNLOAD
+
 
 
 class Package:
@@ -84,7 +117,7 @@ class Package:
         default_install: bool = True,
         package_configs: list[PackageConfig] | None = None,
     ) -> None:
-        self.name = name
+        self.name = name.replace(" ", "_").replace("-", "_")
         self.depends = depends_on if depends_on is not None else []
         self.allow_nix = allow_nix
         self.allow_host = allow_host
@@ -196,10 +229,15 @@ p10k = Package(
 payRespects = Package("pay-respects", allow_host=False)
 
 # Display Packages
-niri = HostPackage("niri")
-waybar = HostPackage("waybar", package_configs=[
-    PackageConfig("WAYBAR_THEME", ["Light", "Dark"], "Theme")
+niri = HostPackage("niri", package_configs=[
+    PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")
 ])
+waybar = HostPackage("waybar")
+
+# Launchers
+wofi = HostPackage("wofi")
+walker = HostPackage("walker")
+
 
 swaync = HostPackage("Sway Notification Centre", void_name="SwayNotificationCenter", binary="swaync")
 
@@ -272,7 +310,7 @@ def display(_win: curses.window):
 
     def rows():
         result: list[tuple[str, str, Package | PackageConfig | None]] = []
-        for category, packages in Install_Config._config.items():
+        for category, packages in Install_Config.config.items():
             result.append(("category", category, None))
             if category not in collapsed:
                 for package in packages:
@@ -332,7 +370,7 @@ def display(_win: curses.window):
                     else:
                         status = " "
                         extra = ""
-                    text = f"    [{status}] {package.name}{extra}"
+                    text = f"    [{status}] {package.name.replace("_", " ")}{extra}"
                 else:
                     assert isinstance(package, PackageConfig)
                     text = f"        {package.display_name}: {package.chosen}"
@@ -405,9 +443,14 @@ def display(_win: curses.window):
 
 
 if __name__ == "__main__":
+    config_file = pathlib.Path(__file__).parent.parent / ".config"
+
+    if config_file.is_file():
+        Install_Config.load_config(config_file)
+
     rc = curses.wrapper(display)
 
     if rc == 0:
-        Install_Config.write_config(pathlib.Path(__file__).parent.parent / ".config")
+        Install_Config.write_config(config_file)
 
     sys.exit(rc)
