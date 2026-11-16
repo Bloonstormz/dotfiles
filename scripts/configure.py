@@ -281,6 +281,11 @@ Install_Config = Config(
         ],
         "Wallpapers": [
             HostPackage("awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)", binary="awww", void_name="awww", nix_name="awww")
+        ],
+        "Screenshot": [
+            HostPackage("wl-clipboard", binary="wl-copy"),
+            HostPackage("grim"),
+            HostPackage("slurp")
         ]
     }
 )

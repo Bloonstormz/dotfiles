@@ -30,9 +30,9 @@ binds {
     Mod+Ctrl+Shift+Q hotkey-overlay-title="Exit niri session" { quit; }
 
     // Capture.
-    Mod+Shift+S            hotkey-overlay-title="Screenshot (region)" { spawn "dfr-screenshot" "region"; }
-    Mod+Ctrl+S       hotkey-overlay-title="Screenshot (monitor: focused)" { spawn "dfr-screenshot" "monitor-focused"; }
-    Mod+Ctrl+Shift+S hotkey-overlay-title="Screenshot (monitor: all)" { spawn "dfr-screenshot" "monitor-all"; }
+    Mod+Shift+S            hotkey-overlay-title="Screenshot (region)" { spawn "~/.config/bin/screenshot" "region"; }
+    Mod+Ctrl+S       hotkey-overlay-title="Screenshot (window)" { spawn "~/.config/bin/screenshot" "monitor-window"; }
+    Mod+Ctrl+Shift+S hotkey-overlay-title="Screenshot (monitor)" { spawn "~/.config/bin/screenshot" "monitor-focused"; }
 
     Mod+Shift+P hotkey-overlay-title="Pick color" { spawn-sh "killall hyprpicker || hyprpicker --autocopy --lowercase-hex"; }
 

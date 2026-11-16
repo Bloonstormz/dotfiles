@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Take a screenshot in a number of different ways. Any of the case statement
+# options can be passed in as a value.
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+MODE="${1:-region}"
+
+case "${MODE}" in
+region)
+  if [[ -n "$NIRI_SOCKET" ]]; then
+    niri msg action screenshot
+  else
+    grim -g "$(slurp -d)" - | wl-copy
+  fi
+  ;;
+window)
+  niri msg action screenshot-window
+  ;;
+monitor-focused)
+  grim -o "$(niri msg --json focused-output | jq --raw-output .name)" - | wl-copy
+  ;;
+monitor-all)
+  grim - | wl-copy
+  ;;
+*)
+  echo "'${MODE}' is not a supported, aborting!" >&2
+  exit 1
+  ;;
+esac
