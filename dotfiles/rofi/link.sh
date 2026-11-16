@@ -2,7 +2,7 @@ run_link() {
 	link "$1/themes" "$CONFIG/rofi/themes"
 	link "$1/config.rasi" "$CONFIG/rofi/config.rasi"
 
-	case "${DISPLAY_THEME:-"Dark"}" in
+	case "${CFG_DISPLAY_THEME:-"Dark"}" in
 	Light)
 		ln -sf "./light.rasi" "$CONFIG/rofi/themes/colours/colours.rasi"
 		;;

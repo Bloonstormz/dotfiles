@@ -120,6 +120,9 @@ if [[ "${#NIX_INSTALL[@]}" -gt 0 && "$SKIP_NIX" == false ]]; then
 		nixrev="$(nix-shell -p jq --run "jq -r .nodes.nixpkgs.locked.rev '$REPO_ROOT/flake.lock'")"
 	fi
 	FORMATTED_NIX_INSTALL=("github:nix-community/nixGL")
+	if [[ "$CFG_WAYBAR_AUTO_HIDE" == Enabled ]]; then
+		FORMATTED_NIX_INSTALL+=("$REPO_ROOT#waybar_auto_hide")
+	fi
 	for pkg in "${NIX_INSTALL[@]}"; do
 		FORMATTED_NIX_INSTALL+=(
 			"nixpkgs/$nixrev#$pkg"

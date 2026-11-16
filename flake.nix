@@ -40,5 +40,11 @@
         ]
         ++ allPkgs;
       };
+
+      packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system: {
+        waybar_auto_hide = import ./nix/packages/waybar-auto-hide.nix {
+          pkgs = nixpkgs.legacyPackages.${system};
+        };
+      });
     };
 }

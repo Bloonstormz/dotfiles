@@ -237,7 +237,9 @@ payRespects = Package("pay_respects", allow_host=False, display_name="Pay Respec
 niri = HostPackage("niri", package_configs=[
     PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")
 ])
-waybar = HostPackage("waybar", void_name="Waybar")
+waybar = HostPackage("waybar", package_configs=[
+    PackageConfig("WAYBAR_AUTO_HIDE", ["Enabled", "Disabled"], "Auto Hide")
+], void_name="Waybar")
 
 # Launchers
 rofi = HostPackage("rofi")

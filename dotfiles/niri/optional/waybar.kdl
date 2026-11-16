@@ -1,1 +1,3 @@
 spawn-at-startup "waybar"
+
+include optional=true "waybar-auto-hide.kdl"

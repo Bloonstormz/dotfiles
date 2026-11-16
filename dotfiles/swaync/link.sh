@@ -4,7 +4,7 @@ run_link() {
 	link "$1/config.json" "$CONFIG/swaync/config.json"
 	link "$1/style.css" "$CONFIG/swaync/style.css"
 
-	case "${DISPLAY_THEME:-"Dark"}" in
+	case "${CFG_DISPLAY_THEME:-"Dark"}" in
 	Light)
 		ln -sf "./light.css" "$CONFIG/swaync/colours/colours.css"
 		;;

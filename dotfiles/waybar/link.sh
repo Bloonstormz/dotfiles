@@ -4,7 +4,7 @@ run_link() {
 	link "$1/style.css" "$CONFIG/waybar/style.css"
 	link "$1/config.jsonc" "$CONFIG/waybar/config.jsonc"
 
-	case "${DISPLAY_THEME:-"Dark"}" in
+	case "${CFG_DISPLAY_THEME:-"Dark"}" in
 	Light)
 		ln -sf "./light.css" "$CONFIG/waybar/colours/colours.css"
 		;;

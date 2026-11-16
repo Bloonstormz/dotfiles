@@ -3,6 +3,8 @@
 	"position": "top",
 	"height": 25,
 	"margin": "5 0",
+	"on-sigusr1": "hide",
+	"on-sigusr2": "show",
 
 	"modules-left": ["group/left-hidden-top", "group/left"],
 	"modules-center": ["clock"],
