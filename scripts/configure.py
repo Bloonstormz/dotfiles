@@ -268,6 +268,7 @@ Install_Config = Config(
         "Editors": create_packages([Package("neovim", binary="nvim")]),
         "Display": [
             niri, waybar, swaync, 
+            HostPackage("gammastep")
         ],
         "Launchers": [
             rofi, wofi

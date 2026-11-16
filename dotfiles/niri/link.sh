@@ -16,5 +16,6 @@ run_link() {
 		command_exists "awww" && link_optional "awww.kdl"
 		command_exists "waybar" && link_optional "waybar.kdl"
 		command_exists "swaync" && link_optional "sway-nc.kdl"
+		command_exists "gammastep" && link_optional "gammastep.kdl"
 	}
 }

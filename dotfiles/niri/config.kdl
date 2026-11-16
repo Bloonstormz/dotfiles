@@ -6,6 +6,7 @@
 // ----------------------------------------------------------------------------
 
 include optional=true "optional/awww.kdl"
+include optional=true "optional/gammastep.kdl"
 include optional=true "optional/hypridle.kdl"
 include optional=true "optional/sway-nc.kdl"
 include optional=true "optional/waybar.kdl"
