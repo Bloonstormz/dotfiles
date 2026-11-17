@@ -91,7 +91,7 @@ command_exists() {
 }
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
-source "$REPO_ROOT/.config"
+[[ -e "$REPO_ROOT/.config" ]] && source "$REPO_ROOT/.config"
 for package in "${packages[@]}"; do
 	if [[ -f "${package}/link.sh" ]]; then
 		# shellcheck disable=SC1091
