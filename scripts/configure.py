@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import curses
 import itertools
+import json
 import os
 import pathlib
 import re
@@ -16,6 +17,14 @@ if os.name == "nt":
     print("Not runnable on Windows!")
     sys.exit(1)
 
+REPO_ROOT = pathlib.Path(__file__).parent.parent
+lock_file = REPO_ROOT / "flake.lock"
+if lock_file.exists():
+    with open(lock_file, "r") as f:
+        nixpkg_rev = "/" + json.load(f)["nodes"]["nixpkgs"]["locked"]["rev"]
+else:
+    nixpkg_rev = ""
+
 
 class Action(Enum):
     IGNORE = 0
@@ -27,7 +36,8 @@ class Action(Enum):
 
 WILL_INSTALL = (Action.HOST_DOWNLOAD, Action.NIX_DOWNLOAD)
 
-CFG_REGEX = re.compile(r'(?P<type>[^_]+)_(?P<name>[^=]+)=(?P<value>.*)$')
+CFG_REGEX = re.compile(r"(?P<type>[^_]+)_(?P<name>[^=]+)=(?P<value>.*)$")
+
 
 class Config:
     config: dict[str, list[Package]]
@@ -40,16 +50,20 @@ class Config:
 
         self.all_packages = []
         pkg_set = set()
+
         def add_pkg(pkg: Package):
             pkg_set.add(pkg)
             if pkg.sub_packages:
                 for sub_pkg in pkg.sub_packages:
                     add_pkg(sub_pkg)
+
         for pkg in itertools.chain(*self.config.values()):
             add_pkg(pkg)
 
         self.all_packages = list(pkg_set)
-        self.all_package_configs = list(itertools.chain(*(pkg.package_configs for pkg in self.all_packages)))
+        self.all_package_configs = list(
+            itertools.chain(*(pkg.package_configs for pkg in self.all_packages))
+        )
 
     def write_config(self, file: pathlib.Path):
         res: list[str] = ["HOST_INSTALL=()", "NIX_INSTALL=()"]
@@ -57,7 +71,7 @@ class Config:
         nix_install: list[str] = []
 
         for package in self.all_packages:
-            pkg_type="false"
+            pkg_type = "false"
             if package.install in WILL_INSTALL:
                 if package.package_configs:
                     for config in package.package_configs:
@@ -65,10 +79,10 @@ class Config:
 
                 if package.install == Action.HOST_DOWNLOAD:
                     host_install.append(package.host_name)
-                    pkg_type="host"
+                    pkg_type = "host"
                 elif package.install == Action.NIX_DOWNLOAD:
-                    nix_install.append(package.nix_name)
-                    pkg_type="nix"
+                    nix_install.append(f"{package.nix_source}#{package.nix_name}")
+                    pkg_type = "nix"
 
             res.append(f"BIN_{package.name}={pkg_type}")
 
@@ -80,7 +94,7 @@ class Config:
 
     def load_config(self, file: pathlib.Path):
         with open(file, "r") as f:
-            for line in f.readlines():
+            for line in f:
                 m = CFG_REGEX.match(line)
                 if m is None:
                     continue
@@ -91,7 +105,9 @@ class Config:
                                 pkg_cfg.chosen = m.group("value")
                     case "BIN":
                         for pkg in self.all_packages:
-                            if pkg.install != Action.DISABLED and pkg.name == m.group("name"):
+                            if pkg.install != Action.DISABLED and pkg.name == m.group(
+                                "name"
+                            ):
                                 match m.group("value"):
                                     case "false":
                                         pkg.install = Action.IGNORE
@@ -101,10 +117,9 @@ class Config:
                                         pkg.install = Action.NIX_DOWNLOAD
 
 
-
 class Package:
-    name: str # Internal identifier - Must be a valid bash variable name
-    display_name: str # Name shown to user - any valid string
+    name: str  # Internal identifier - Must be a valid bash variable name
+    display_name: str  # Name shown to user - any valid string
     depends: list[Package]
 
     install: Action
@@ -112,6 +127,7 @@ class Package:
     allow_host: bool = True
 
     nix_name: str
+    nix_source: str
     host_name: str
 
     package_configs: list[PackageConfig]
@@ -121,12 +137,11 @@ class Package:
         self,
         name: str,
         depends_on: list[Package] | None = None,
-
         nix_name: str | None = None,
+        nix_source: str = f"nixpkgs{nixpkg_rev}",
         void_name: str | None = None,
         binary: str | None = None,
         display_name: str | None = None,
-
         allow_nix: bool = True,
         allow_host: bool = True,
         default_install: bool = True,
@@ -140,6 +155,7 @@ class Package:
         self.allow_host = allow_host
 
         self.nix_name = nix_name if nix_name is not None else name
+        self.nix_source = nix_source
         if HOST_INSTALL == "xbps-install":
             self.host_name = void_name if void_name is not None else name
         else:
@@ -180,13 +196,21 @@ class Package:
         if self.allow_nix:
             options.append(Action.NIX_DOWNLOAD)
         self.install = options[(options.index(self.install) + 1) % len(options)]
+
     def __hash__(self) -> int:
         return self.name.__hash__()
+
 
 class HostPackage(Package):
     def __init__(self, name: str, **opts) -> None:
         maybe_set_dict(opts, "default_install", False)
         maybe_set_dict(opts, "allow_nix", False)
+        super().__init__(name, **opts)
+
+
+class NixPackage(Package):
+    def __init__(self, name: str, **opts) -> None:
+        maybe_set_dict(opts, "allow_host", False)
         super().__init__(name, **opts)
 
 
@@ -197,12 +221,15 @@ class PackageConfig:
 
     chosen: str
 
-    def __init__(self, name: str, choices: list[str], display_name: str|None = None) -> None:
+    def __init__(
+        self, name: str, choices: list[str], display_name: str | None = None
+    ) -> None:
         self.name = name
         self.choices = choices
         self.display_name = display_name if display_name is not None else name
 
         self.chosen = choices[0]
+
 
 def command_exists(command: str) -> bool:
     return not subprocess.run(
@@ -225,6 +252,7 @@ elif command_exists("nixos-rebuild"):
 else:
     raise NotImplementedError("Unsupported Host")
 
+
 def maybe_set_dict(dict: dict[str, Any], key: str, value: Any):
     if key not in dict:
         dict[key] = value
@@ -240,16 +268,39 @@ def create_packages(package_names: list[str | Package], **opts) -> list[Package]
 
     return res
 
+
 # Utilities
-networkManager = Package("NetworkManager", display_name="Network Manager", allow_nix=False)
-nmApplet = Package("networkManagerApplet", display_name="Network Manager Applet", void_name="network-manager-applet", allow_nix=False, depends_on=[networkManager], binary="nm-applet")
+networkManager = Package(
+    "NetworkManager", display_name="Network Manager", allow_nix=False
+)
+nmApplet = Package(
+    "networkManagerApplet",
+    display_name="Network Manager Applet",
+    void_name="network-manager-applet",
+    allow_nix=False,
+    depends_on=[networkManager],
+    binary="nm-applet",
+)
 pavucontrol = Package("pavucontrol", allow_nix=False)
 pulseaudioutils = Package("pulseaudioutils", allow_nix=False, binary="pactl")
 playerctl = Package("playerctl", allow_nix=False)
 bluez = Package("bluez", allow_nix=False, binary="bluetoothctl")
-blueman = Package("blueman", allow_nix=False, void_name="blueman", binary="blueman-manager", display_name="Blueman", depends_on=[bluez])
+blueman = Package(
+    "blueman",
+    allow_nix=False,
+    void_name="blueman",
+    binary="blueman-manager",
+    display_name="Blueman",
+    depends_on=[bluez],
+)
 
-nwg_look = Package("nwg_look", display_name="Nwg Look", allow_nix=False, void_name="nwg-look", binary="nwg-look")
+nwg_look = Package(
+    "nwg_look",
+    display_name="Nwg Look",
+    allow_nix=False,
+    void_name="nwg-look",
+    binary="nwg-look",
+)
 
 cliphist = Package("cliphist", allow_nix=False)
 wlclipboard = Package(
@@ -257,30 +308,44 @@ wlclipboard = Package(
 )
 
 zsh = Package("zsh")
-omz = Package("oh_my_zsh", allow_host=False, depends_on=[zsh], display_name="Oh My Zsh", nix_name="oh-my-zsh")
+omz = Package(
+    "oh_my_zsh",
+    allow_host=False,
+    depends_on=[zsh],
+    display_name="Oh My Zsh",
+    nix_name="oh-my-zsh",
+)
 p10k = Package(
     "powerlevel10k", allow_host=False, depends_on=[zsh], nix_name="zsh-powerlevel10k"
 )
-payRespects = Package("pay_respects", allow_host=False, display_name="Pay Respects", nix_name="pay-respects")
+payRespects = Package(
+    "pay_respects",
+    allow_host=False,
+    display_name="Pay Respects",
+    nix_name="pay-respects",
+)
 
 # Display Packages
-niri = HostPackage("niri", package_configs=[
-    PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")
-], sub_packages=[
-    cliphist,
-    wlclipboard
-])
-waybar = HostPackage("waybar", package_configs=[
-    PackageConfig("WAYBAR_AUTO_HIDE", ["Enabled", "Disabled"], "Auto Hide")
-], sub_packages=[
-    networkManager,
-    nmApplet,
-    pavucontrol,
-    pulseaudioutils,
-    playerctl,
-    bluez,
-    blueman
-], void_name="Waybar")
+niri = HostPackage(
+    "niri",
+    package_configs=[PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")],
+    sub_packages=[cliphist, wlclipboard],
+)
+waybar_auto_hide = NixPackage("waybar_auto_hide", nix_source=str(REPO_ROOT))
+waybar = HostPackage(
+    "waybar",
+    sub_packages=[
+        waybar_auto_hide,
+        networkManager,
+        nmApplet,
+        pavucontrol,
+        pulseaudioutils,
+        playerctl,
+        bluez,
+        blueman,
+    ],
+    void_name="Waybar",
+)
 
 # Launchers
 rofi = HostPackage("rofi")
@@ -288,8 +353,13 @@ wofi = HostPackage("wofi")
 
 # Notifications
 
-swaync = HostPackage("Sway_Notification_Centre", void_name="SwayNotificationCenter", binary="swaync", display_name="Sway Notification Centre",
-                     sub_packages=[nwg_look])
+swaync = HostPackage(
+    "Sway_Notification_Centre",
+    void_name="SwayNotificationCenter",
+    binary="swaync",
+    display_name="Sway Notification Centre",
+    sub_packages=[nwg_look],
+)
 
 Install_Config = Config(
     {
@@ -309,20 +379,27 @@ Install_Config = Config(
             ],
         ),
         "Apps": create_packages(["firefox", "ghostty"], default_install=False),
-        "Editors": create_packages([Package("neovim", binary="nvim")]),
-        "Display": [
-            niri, waybar, swaync,
-            HostPackage("gammastep")
-        ],
-        "Launchers": [
-            rofi, wofi
-        ],
-        "Idle": [
-            HostPackage("hypridle"),
-            HostPackage("hyprlock")
-        ],
+        "Editors": create_packages(
+            [
+                Package(
+                    "neovim",
+                    binary="nvim",
+                    sub_packages=[
+                        Package(
+                            "lolcat",
+                            nix_name="lolcat-c",
+                            nix_source=str(REPO_ROOT),
+                            void_name="lolcat-c",
+                        )
+                    ],
+                )
+            ]
+        ),
+        "Display": [niri, waybar, swaync, HostPackage("gammastep")],
+        "Launchers": [rofi, wofi],
+        "Idle": [HostPackage("hypridle"), HostPackage("hyprlock")],
         "Wallpapers": [
-            HostPackage("awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)", binary="awww", void_name="awww", nix_name="awww")
+            HostPackage("awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)")
         ],
         "Screenshot": [
             wlclipboard,
@@ -493,7 +570,9 @@ def display(_win: curses.window):
             if kind == "config":
                 if isinstance(package, PackageConfig):
                     current = package.choices.index(package.chosen)
-                    package.chosen = package.choices[(current + 1) % len(package.choices)]
+                    package.chosen = package.choices[
+                        (current + 1) % len(package.choices)
+                    ]
             elif key in ("h", "H"):
                 if isinstance(package, Package) and package.allow_host:
                     package.install = Action.HOST_DOWNLOAD
@@ -516,7 +595,7 @@ def display(_win: curses.window):
 
 
 if __name__ == "__main__":
-    config_file = pathlib.Path(__file__).parent.parent / ".config"
+    config_file = REPO_ROOT / ".config"
 
     if config_file.is_file():
         Install_Config.load_config(config_file)

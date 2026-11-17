@@ -15,9 +15,10 @@
   };
 
   outputs =
-    { self
-    , nixpkgs
-    , ...
+    {
+      self,
+      nixpkgs,
+      ...
     }@inputs:
     let
       devPkgs = [
@@ -43,6 +44,9 @@
 
       packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system: {
         waybar_auto_hide = import ./nix/packages/waybar-auto-hide.nix {
+          pkgs = nixpkgs.legacyPackages.${system};
+        };
+        lolcat-c = import ./nix/packages/lolcat-c.nix {
           pkgs = nixpkgs.legacyPackages.${system};
         };
       });
