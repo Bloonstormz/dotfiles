@@ -88,7 +88,7 @@ run_cmd() {
 				pkill gammastep
 				hyprctl dispatch 'hl.dsp.exit()'
 			elif [[ -n "$NIRI_SOCKET" ]]; then
-				niri msg action quit
+				niri msg action quit -s
 			else
 				exit 1
 			fi
