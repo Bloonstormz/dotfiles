@@ -38,7 +38,17 @@ class Config:
     def __init__(self, config: dict[str, list[Package]]) -> None:
         self.config = config
 
-        self.all_packages = list(itertools.chain(*self.config.values()))
+        self.all_packages = []
+        pkg_set = set()
+        def add_pkg(pkg: Package):
+            pkg_set.add(pkg)
+            if pkg.sub_packages:
+                for sub_pkg in pkg.sub_packages:
+                    add_pkg(sub_pkg)
+        for pkg in itertools.chain(*self.config.values()):
+            add_pkg(pkg)
+
+        self.all_packages = list(pkg_set)
         self.all_package_configs = list(itertools.chain(*(pkg.package_configs for pkg in self.all_packages)))
 
     def write_config(self, file: pathlib.Path):
@@ -105,6 +115,7 @@ class Package:
     host_name: str
 
     package_configs: list[PackageConfig]
+    sub_packages: list[Package]
 
     def __init__(
         self,
@@ -120,6 +131,7 @@ class Package:
         allow_host: bool = True,
         default_install: bool = True,
         package_configs: list[PackageConfig] | None = None,
+        sub_packages: list[Package] | None = None,
     ) -> None:
         self.name = name.replace(" ", "_").replace("-", "_")
         self.display_name = name if display_name is None else display_name
@@ -147,6 +159,7 @@ class Package:
             self.install = Action.IGNORE
 
         self.package_configs = [] if package_configs is None else package_configs
+        self.sub_packages = [] if sub_packages is None else sub_packages
 
     def set_action(self, action: Action) -> bool:
         if (
@@ -167,6 +180,8 @@ class Package:
         if self.allow_nix:
             options.append(Action.NIX_DOWNLOAD)
         self.install = options[(options.index(self.install) + 1) % len(options)]
+    def __hash__(self) -> int:
+        return self.name.__hash__()
 
 class HostPackage(Package):
     def __init__(self, name: str, **opts) -> None:
@@ -225,6 +240,21 @@ def create_packages(package_names: list[str | Package], **opts) -> list[Package]
 
     return res
 
+# Utilities
+networkManager = Package("NetworkManager", display_name="Network Manager", allow_nix=False)
+nmApplet = Package("networkManagerApplet", display_name="Network Manager Applet", void_name="network-manager-applet", allow_nix=False, depends_on=[networkManager], binary="nm-applet")
+pavucontrol = Package("pavucontrol", allow_nix=False)
+pulseaudioutils = Package("pulseaudioutils", allow_nix=False, binary="pactl")
+playerctl = Package("playerctl", allow_nix=False)
+bluez = Package("bluez", allow_nix=False, binary="bluetoothctl")
+blueman = Package("blueman", allow_nix=False, void_name="blueman", binary="blueman-manager", display_name="Blueman", depends_on=[bluez])
+
+nwg_look = Package("nwg_look", display_name="Nwg Look", allow_nix=False, void_name="nwg-look", binary="nwg-look")
+
+cliphist = Package("cliphist", allow_nix=False)
+wlclipboard = Package(
+    "wlclipboard", void_name="wl-clipboard", allow_nix=False, binary="wl-copy"
+)
 
 zsh = Package("zsh")
 omz = Package("oh_my_zsh", allow_host=False, depends_on=[zsh], display_name="Oh My Zsh", nix_name="oh-my-zsh")
@@ -236,9 +266,20 @@ payRespects = Package("pay_respects", allow_host=False, display_name="Pay Respec
 # Display Packages
 niri = HostPackage("niri", package_configs=[
     PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")
+], sub_packages=[
+    cliphist,
+    wlclipboard
 ])
 waybar = HostPackage("waybar", package_configs=[
     PackageConfig("WAYBAR_AUTO_HIDE", ["Enabled", "Disabled"], "Auto Hide")
+], sub_packages=[
+    networkManager,
+    nmApplet,
+    pavucontrol,
+    pulseaudioutils,
+    playerctl,
+    bluez,
+    blueman
 ], void_name="Waybar")
 
 # Launchers
@@ -247,7 +288,8 @@ wofi = HostPackage("wofi")
 
 # Notifications
 
-swaync = HostPackage("Sway_Notification_Centre", void_name="SwayNotificationCenter", binary="swaync", display_name="Sway Notification Centre")
+swaync = HostPackage("Sway_Notification_Centre", void_name="SwayNotificationCenter", binary="swaync", display_name="Sway Notification Centre",
+                     sub_packages=[nwg_look])
 
 Install_Config = Config(
     {
@@ -269,7 +311,7 @@ Install_Config = Config(
         "Apps": create_packages(["firefox", "ghostty"], default_install=False),
         "Editors": create_packages([Package("neovim", binary="nvim")]),
         "Display": [
-            niri, waybar, swaync, 
+            niri, waybar, swaync,
             HostPackage("gammastep")
         ],
         "Launchers": [
@@ -283,7 +325,7 @@ Install_Config = Config(
             HostPackage("awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)", binary="awww", void_name="awww", nix_name="awww")
         ],
         "Screenshot": [
-            HostPackage("wl-clipboard", binary="wl-copy"),
+            wlclipboard,
             HostPackage("grim"),
             HostPackage("slurp")
         ]
@@ -333,19 +375,26 @@ def display(_win: curses.window):
     scroll = 0
 
     def rows():
-        result: list[tuple[str, str, Package | PackageConfig | None]] = []
+        result: list[tuple[str, str, Package | PackageConfig | None, int]] = []
+
+        def add_package(package: Package, category: str, depth: int) -> None:
+            if package.install == Action.DISABLED or not can_install(package):
+                return
+
+            result.append(("package", category, package, depth))
+            if package.install in WILL_INSTALL:
+                result.extend(
+                    ("config", category, config, depth + 1)
+                    for config in package.package_configs
+                )
+            for sub_package in package.sub_packages:
+                add_package(sub_package, category, depth + 1)
+
         for category, packages in Install_Config.config.items():
-            result.append(("category", category, None))
+            result.append(("category", category, None, 0))
             if category not in collapsed:
                 for package in packages:
-                    if package.install == Action.DISABLED or not can_install(package):
-                        continue
-                    result.append(("package", category, package))
-                    if package.install in WILL_INSTALL:
-                        result.extend(
-                            ("config", category, config)
-                            for config in package.package_configs
-                        )
+                    add_package(package, category, 0)
         return result
 
     def can_install(package: Package) -> bool:
@@ -374,7 +423,7 @@ def display(_win: curses.window):
                 scroll = selected - body_height + 1
             scroll = max(0, min(scroll, max(0, len(visible_rows) - body_height)))
 
-            for screen_row, (kind, label, package) in enumerate(
+            for screen_row, (kind, label, package, depth) in enumerate(
                 visible_rows[scroll : scroll + body_height], start=1
             ):
                 index = scroll + screen_row - 1
@@ -394,10 +443,10 @@ def display(_win: curses.window):
                     else:
                         status = " "
                         extra = ""
-                    text = f"    [{status}] {package.display_name}{extra}"
+                    text = f"{'    ' * (depth + 1)}[{status}] {package.display_name}{extra}"
                 else:
                     assert isinstance(package, PackageConfig)
-                    text = f"        {package.display_name}: {package.chosen}"
+                    text = f"{'    ' * (depth + 1)}{package.display_name}: {package.chosen}"
                 win.addnstr(screen_row, 0, text, max(0, width - 1), attr)
 
             if height > 1:
@@ -430,7 +479,7 @@ def display(_win: curses.window):
         elif key in (curses.KEY_LEFT, curses.KEY_RIGHT):
             visible_rows = rows()
             if visible_rows:
-                kind, _, item = visible_rows[selected]
+                kind, _, item, _ = visible_rows[selected]
                 if kind == "config" and isinstance(item, PackageConfig):
                     current = item.choices.index(item.chosen)
                     delta = -1 if key == curses.KEY_LEFT else 1
@@ -439,7 +488,7 @@ def display(_win: curses.window):
             visible_rows = rows()
             if not visible_rows:
                 continue
-            kind, label, package = visible_rows[selected]
+            kind, label, package, _ = visible_rows[selected]
 
             if kind == "config":
                 if isinstance(package, PackageConfig):
