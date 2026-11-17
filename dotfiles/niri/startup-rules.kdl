@@ -1,0 +1,14 @@
+window-rule {
+	match at-startup=true app-id="steam"
+	match at-startup=true app-id="vesktop"
+
+	open-focused false
+	open-on-workspace "games"
+}
+
+window-rule {
+	match at-startup=true app-id="firefox"
+
+	open-focused true
+	open-on-workspace "browser"
+}

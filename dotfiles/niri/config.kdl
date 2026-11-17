@@ -96,11 +96,20 @@ window-rule {
     block-out-from "screencast"
 }
 
+// ----------------------------------------------------------------------------
+// Named workspaces
+// ----------------------------------------------------------------------------
+
+workspace "terminal"
+workspace "browser"
+workspace "games"
+
 environment {
     EDITOR "nvim"
 }
 
 include "floating.kdl"
+include "startup-rules.kdl"
 
 
 include "binds.kdl"

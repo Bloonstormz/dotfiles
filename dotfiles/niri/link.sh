@@ -7,6 +7,7 @@ run_link() {
 	link "$1/config.kdl" "$CONFIG/niri/config.kdl"
 	link "$1/binds.kdl" "$CONFIG/niri/binds.kdl"
 	link "$1/floating.kdl" "$CONFIG/niri/floating.kdl"
+	link "$1/startup-rules.kdl" "$CONFIG/niri/startup-rules.kdl"
 	link "$1/config.kdl.local" "$CONFIG/niri/config.kdl.local"
 
 	{
