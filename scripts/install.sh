@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/lib/colours.sh"
 source "$SCRIPT_DIR/lib/paths.sh"
 
 CONFIGURE=false
+DRY_RUN=false
 while [[ "$#" -gt 0 ]]; do
 	flag="$1"
 	shift
@@ -18,6 +19,9 @@ while [[ "$#" -gt 0 ]]; do
 	-n | --nix)
 		reply="$1"
 		shift
+		;;
+	-d | --dry-run)
+		DRY_RUN=true
 		;;
 	esac
 done
@@ -106,17 +110,19 @@ if [[ "${#HOST_INSTALL[@]}" -gt 0 ]]; then
 			fi
 		fi
 
-		printf "sudo xbps-install -S "
-		printf "%s " "${HOST_INSTALL[@]}"
-		printf "\n"
-		sudo xbps-install -S "${HOST_INSTALL[@]}"
+		printf "sudo xbps-install -S \\ \n"
+		printf "    %s \\ \n" "${HOST_INSTALL[@]}"
+		if [[ "$DRY_RUN" == false ]]; then
+			sudo xbps-install -S "${HOST_INSTALL[@]}"
+		fi
 	fi
 fi
 
 if [[ "${#NIX_INSTALL[@]}" -gt 0 && "$SKIP_NIX" == false ]]; then
 	NIX_INSTALL+=("github:nix-community/nixGL")
-	printf "nix profile add "
-	printf "%s " "${NIX_INSTALL[@]}"
-	printf "\n"
-	nix profile add --impure "${NIX_INSTALL[@]}"
+	printf "nix profile add --impure \\ \n"
+	printf "    %s \\ \n" "${NIX_INSTALL[@]}"
+	if [[ "$DRY_RUN" == false ]]; then
+		nix profile add --impure "${NIX_INSTALL[@]}"
+	fi
 fi
