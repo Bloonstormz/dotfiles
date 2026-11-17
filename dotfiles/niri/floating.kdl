@@ -46,3 +46,21 @@ window-rule {
     default-window-height { proportion 0.5; }
 }
 
+window-rule {
+    match is-floating=true
+
+    shadow {
+        on
+    }
+
+    focus-ring {
+        off
+    }
+
+    border {
+        on
+        width 1
+        active-color "#7fc8ff"
+        inactive-color "#505050"
+    }
+}
