@@ -282,7 +282,6 @@ nmApplet = Package(
     binary="nm-applet",
 )
 pavucontrol = Package("pavucontrol", allow_nix=False)
-pulseaudioutils = Package("pulseaudioutils", allow_nix=False, binary="pactl")
 playerctl = Package("playerctl", allow_nix=False)
 bluez = Package("bluez", allow_nix=False, binary="bluetoothctl")
 blueman = Package(
@@ -339,7 +338,6 @@ waybar = HostPackage(
         networkManager,
         nmApplet,
         pavucontrol,
-        pulseaudioutils,
         playerctl,
         bluez,
         blueman,
@@ -395,17 +393,25 @@ Install_Config = Config(
                 )
             ]
         ),
-        "Display": [niri, waybar, swaync, HostPackage("gammastep")],
+        "Display": [
+            niri,
+            waybar,
+            swaync,
+            HostPackage("gammastep"),
+            HostPackage("SwayOSD", binary="swayosd-client"),
+        ],
         "Launchers": [rofi, wofi],
         "Idle": [HostPackage("hypridle"), HostPackage("hyprlock")],
         "Wallpapers": [
-            HostPackage("awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)")
+            HostPackage(
+                "awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)"
+            )
         ],
         "Screenshot": [
             wlclipboard,
             HostPackage("grim"),
-            HostPackage("slurp")
-        ]
+            HostPackage("slurp"),
+        ],
     }
 )
 

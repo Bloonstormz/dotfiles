@@ -48,8 +48,8 @@ binds {
     Mod+Ctrl+Shift+BackSlash hotkey-overlay-title="Pick theme" { spawn "dfr-theme-set" "--menu"; }
 
     // Media keys.
-    XF86AudioRaiseVolume allow-when-locked=true hotkey-overlay-title="Raise volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+"; }
-    XF86AudioLowerVolume allow-when-locked=true hotkey-overlay-title="Lower volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
+    XF86AudioRaiseVolume allow-when-locked=true hotkey-overlay-title="Raise volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
+    XF86AudioLowerVolume allow-when-locked=true hotkey-overlay-title="Lower volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
     XF86AudioMute        allow-when-locked=true hotkey-overlay-title="Mute playback" { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
     XF86AudioMicMute     allow-when-locked=true hotkey-overlay-title="Mute microphone"{ spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
 

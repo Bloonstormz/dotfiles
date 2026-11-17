@@ -137,7 +137,7 @@
 		"tooltip-format": "{volume}%",
 		"format-muted": "<span size='9.5pt'></span>",
 		"scroll-step": 2,
-		"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+		"on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
 		"on-click-right": "pavucontrol -t 4",
 		"format-icons": {
 			"headphone": "",

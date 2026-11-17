@@ -2,16 +2,6 @@
 //   https://yalter.github.io/niri/Configuration:-Introduction
 
 // ----------------------------------------------------------------------------
-// Launch at startup
-// ----------------------------------------------------------------------------
-
-include optional=true "optional/awww.kdl"
-include optional=true "optional/gammastep.kdl"
-include optional=true "optional/hypridle.kdl"
-include optional=true "optional/sway-nc.kdl"
-include optional=true "optional/waybar.kdl"
-
-// ----------------------------------------------------------------------------
 // Input devices (mouse, trackpad, keyboard, etc.)
 // ----------------------------------------------------------------------------
 
@@ -111,8 +101,14 @@ environment {
 include "floating.kdl"
 include "startup-rules.kdl"
 
-
 include "binds.kdl"
+
+include optional=true "optional/awww.kdl"
+include optional=true "optional/gammastep.kdl"
+include optional=true "optional/hypridle.kdl"
+include optional=true "optional/sway-nc.kdl"
+include optional=true "optional/sway-osd.kdl"
+include optional=true "optional/waybar.kdl"
 
 // ----------------------------------------------------------------------------
 // Theme and personalized configs
