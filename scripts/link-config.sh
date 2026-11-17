@@ -86,6 +86,18 @@ link() {
 	printf 'Linked %s -> ./%s\n' "$destination" "$relative_wd"
 }
 
+link_files() {
+	local source_dir="$1"
+	local destination_dir="$2"
+
+	mapfile -t files < <(
+		find "$source_dir" -maxdepth 1 -mindepth 1 -type f -not -name link.sh
+	)
+	for file in "${files[@]}"; do
+		link "$file" "${destination_dir}/$(basename "$file")"
+	done
+}
+
 command_exists() {
 	command -v "$1" &>/dev/null
 }

@@ -1,6 +1,5 @@
 run_link() {
 	link "$1/colours" "$CONFIG/swaync/colours"
-	link "$1/scripts" "$CONFIG/swaync/scripts"
 	link "$1/config.json" "$CONFIG/swaync/config.json"
 	link "$1/style.css" "$CONFIG/swaync/style.css"
 
