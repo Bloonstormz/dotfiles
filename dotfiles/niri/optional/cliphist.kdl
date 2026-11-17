@@ -1,0 +1,5 @@
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+
+binds {
+	Mod+V      repeat=false hotkey-overlay-title="Launcher (clipboard)" { spawn "~/.config/bin/toggle_launcher" "clipboard"; }
+}

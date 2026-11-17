@@ -68,7 +68,6 @@ binds {
     // Launcher.
     Mod+Space               hotkey-overlay-title="Launcher" { spawn "~/.config/bin/toggle_launcher" "drun"; }
     Mod+W      repeat=false hotkey-overlay-title="Launcher (windows)" { spawn "walker" "--provider" "windows"; }
-    Mod+V      repeat=false hotkey-overlay-title="Launcher (clipboard)" { spawn "~/.config/bin/toggle_launcher" "clipboard"; }
 
     // Apps.
     Mod+Alt+H            hotkey-overlay-title="System health" { spawn "dfr-launch-or-focus-tui" "monitor"; }

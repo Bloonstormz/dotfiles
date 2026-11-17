@@ -16,5 +16,6 @@ run_link() {
 		command_exists "swaync" && link_optional "sway-nc.kdl"
 		command_exists "gammastep" && link_optional "gammastep.kdl"
 		command_exists "swayosd-client" && link_optional "sway-osd.kdl"
+		command_exists "cliphist" && link_optional "cliphist.kdl"
 	}
 }
