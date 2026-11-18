@@ -30,9 +30,10 @@ _add_path PATH "$HOME/bin"
 _add_path PATH "$HOME/.nix-profile/bin"
 _add_path PATH "$HOME/scripts"
 
-_add_path XDG_DATA_DIRS "/usr/share/"
-_add_path XDG_DATA_DIRS "/usr/local/share/"
-_add_path XDG_DATA_DIRS "$HOME/.nix-profile/share/"
+_add_path XDG_DATA_DIRS "/usr/share"
+_add_path XDG_DATA_DIRS "/usr/local/share"
+_add_path XDG_DATA_DIRS "$HOME/.local/share"
+_add_path XDG_DATA_DIRS "$HOME/.nix-profile/share"
 
 # Trailing : to retain access to system man pages
 if [ -z "$MANPATH" ]; then
