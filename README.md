@@ -19,6 +19,7 @@ Allows choosing which programs to install (and then installs them)
 - Python3
 - One of the following distros:
   - Void Linux
+  - Arch Linux (Some packages may not be available if they are from AUR)
   - NixOS (Support is a WIP. Requires some manual edits of `flake.nix` and `nix/nixos/hosts/`)
 
 ## Config Files Only

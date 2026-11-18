@@ -115,6 +115,12 @@ if [[ "${#HOST_INSTALL[@]}" -gt 0 ]]; then
 		if [[ "$DRY_RUN" == false ]]; then
 			sudo xbps-install -S "${HOST_INSTALL[@]}"
 		fi
+	elif command -v pacman &>/dev/null; then
+		printf "sudo pacman -S \\ \n"
+		printf "    %s \\ \n" "${HOST_INSTALL[@]}"
+		if [[ "$DRY_RUN" == false ]]; then
+			sudo pacman -S "${HOST_INSTALL[@]}"
+		fi
 	fi
 fi
 

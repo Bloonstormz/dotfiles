@@ -140,6 +140,7 @@ class Package:
         nix_name: str | None = None,
         nix_source: str = f"nixpkgs{nixpkg_rev}",
         void_name: str | None = None,
+        arch_name: str | None = None,
         binary: str | None = None,
         display_name: str | None = None,
         allow_nix: bool = True,
@@ -157,19 +158,21 @@ class Package:
         self.nix_name = nix_name if nix_name is not None else name
         self.nix_source = nix_source
         if HOST_INSTALL == "xbps-install":
-            self.host_name = void_name if void_name is not None else name
+            self.__set_host_name(void_name)
+        elif HOST_INSTALL == "pacman":
+            self.__set_host_name(arch_name)
         else:
             raise ValueError(f"Unexpected host installer: '{HOST_INSTALL}'")
 
-        if not ((CAN_SUDO and allow_host) or allow_nix):
+        if not ((CAN_SUDO and self.allow_host) or self.allow_nix):
             self.install = Action.DISABLED
         elif (
             not command_exists(binary if binary is not None else name)
             and default_install
         ):
-            if CAN_SUDO and allow_host:
+            if CAN_SUDO and self.allow_host:
                 self.install = Action.HOST_DOWNLOAD
-            elif allow_nix:
+            elif self.allow_nix:
                 self.install = Action.NIX_DOWNLOAD
         else:
             self.install = Action.IGNORE
@@ -196,6 +199,15 @@ class Package:
         if self.allow_nix:
             options.append(Action.NIX_DOWNLOAD)
         self.install = options[(options.index(self.install) + 1) % len(options)]
+
+    def __set_host_name(self, name: str | None):
+        if name is None:
+            self.host_name = self.name
+        elif name == "":
+            self.host_name = ""
+            self.allow_host = False
+        else:
+            self.host_name = name
 
     def __hash__(self) -> int:
         return self.name.__hash__()
@@ -247,6 +259,8 @@ CAN_SUDO = sudo_check.returncode == 0 or sudo_check.stderr.startswith("sudo:")
 
 if command_exists("xbps-install"):
     HOST_INSTALL = "xbps-install"
+elif command_exists("pacman"):
+    HOST_INSTALL = "pacman"
 elif command_exists("nixos-rebuild"):
     raise NotImplementedError("TODO: Nix support")
 else:
@@ -271,12 +285,16 @@ def create_packages(package_names: list[str | Package], **opts) -> list[Package]
 
 # Utilities
 networkManager = Package(
-    "NetworkManager", display_name="Network Manager", allow_nix=False
+    "NetworkManager",
+    display_name="Network Manager",
+    allow_nix=False,
+    arch_name="networkmanager",
 )
 nmApplet = Package(
     "networkManagerApplet",
     display_name="Network Manager Applet",
     void_name="network-manager-applet",
+    arch_name="network-manager-applet",
     allow_nix=False,
     depends_on=[networkManager],
     binary="nm-applet",
@@ -298,12 +316,17 @@ nwg_look = Package(
     display_name="Nwg Look",
     allow_nix=False,
     void_name="nwg-look",
+    arch_name="nwg-look",
     binary="nwg-look",
 )
 
 cliphist = Package("cliphist", allow_nix=False)
 wlclipboard = Package(
-    "wlclipboard", void_name="wl-clipboard", allow_nix=False, binary="wl-copy"
+    "wlclipboard",
+    void_name="wl-clipboard",
+    arch_name="wl-clipboard",
+    allow_nix=False,
+    binary="wl-copy",
 )
 
 zsh = Package("zsh")
@@ -354,6 +377,7 @@ wofi = HostPackage("wofi")
 swaync = HostPackage(
     "Sway_Notification_Centre",
     void_name="SwayNotificationCenter",
+    arch_name="swaync",
     binary="swaync",
     display_name="Sway Notification Centre",
     sub_packages=[nwg_look],
@@ -365,7 +389,7 @@ Install_Config = Config(
         "Terminal Utilities": create_packages(
             [
                 "bat",
-                "delta",
+                Package("delta", arch_name="git-delta"),
                 "fd",
                 "fzf",
                 "git",
@@ -388,6 +412,7 @@ Install_Config = Config(
                             nix_name="lolcat-c",
                             nix_source=str(REPO_ROOT),
                             void_name="lolcat-c",
+                            arch_name="",
                         )
                     ],
                 )
@@ -398,7 +423,7 @@ Install_Config = Config(
             waybar,
             swaync,
             HostPackage("gammastep"),
-            HostPackage("SwayOSD", binary="swayosd-client"),
+            HostPackage("SwayOSD", binary="swayosd-client", arch_name="swayosd"),
         ],
         "Launchers": [rofi, wofi],
         "Idle": [HostPackage("hypridle"), HostPackage("hyprlock")],
