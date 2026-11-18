@@ -8,6 +8,7 @@ source "$SCRIPT_DIR/lib/paths.sh"
 
 CONFIGURE=false
 DRY_RUN=false
+UPDATE_HOST=false
 while [[ "$#" -gt 0 ]]; do
 	flag="$1"
 	shift
@@ -22,6 +23,9 @@ while [[ "$#" -gt 0 ]]; do
 		;;
 	-d | --dry-run)
 		DRY_RUN=true
+		;;
+	-u | --update-host)
+		UPDATE_HOST=true
 		;;
 	esac
 done
@@ -110,22 +114,31 @@ if [[ "${#HOST_INSTALL[@]}" -gt 0 ]]; then
 			fi
 		fi
 
-		printf "sudo xbps-install -S \\ \n"
+		if [[ "$UPDATE_HOST" == true ]]; then
+			UPDATE_ARG="-S "
+		else
+			UPDATE_ARG=""
+		fi
+		printf "sudo xbps-install %s\\ \n" "$UPDATE_ARG"
 		printf "    %s \\ \n" "${HOST_INSTALL[@]}"
 		if [[ "$DRY_RUN" == false ]]; then
-			sudo xbps-install -S "${HOST_INSTALL[@]}"
+			sudo xbps-install ${UPDATE_ARG}"${HOST_INSTALL[@]}"
 		fi
 	elif command -v pacman &>/dev/null; then
-		printf "sudo pacman -S \\ \n"
+		if [[ "$UPDATE_HOST" == true ]]; then
+			UPDATE_ARG="-yu "
+		else
+			UPDATE_ARG=""
+		fi
+		printf "sudo pacman -S%s \\ \n" "$UPDATE_ARG"
 		printf "    %s \\ \n" "${HOST_INSTALL[@]}"
 		if [[ "$DRY_RUN" == false ]]; then
-			sudo pacman -S "${HOST_INSTALL[@]}"
+			sudo pacman -S${UPDATE_ARG} "${HOST_INSTALL[@]}"
 		fi
 	fi
 fi
 
 if [[ "${#NIX_INSTALL[@]}" -gt 0 && "$SKIP_NIX" == false ]]; then
-	NIX_INSTALL+=("github:nix-community/nixGL")
 	printf "nix profile add --impure \\ \n"
 	printf "    %s \\ \n" "${NIX_INSTALL[@]}"
 	if [[ "$DRY_RUN" == false ]]; then

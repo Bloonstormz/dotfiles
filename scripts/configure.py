@@ -18,6 +18,7 @@ if os.name == "nt":
     sys.exit(1)
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
+NIX_REPO_ROOT = f"path:{REPO_ROOT}"
 lock_file = REPO_ROOT / "flake.lock"
 if lock_file.exists():
     with open(lock_file, "r") as f:
@@ -353,7 +354,8 @@ niri = HostPackage(
     package_configs=[PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")],
     sub_packages=[cliphist, wlclipboard],
 )
-waybar_auto_hide = NixPackage("waybar_auto_hide", nix_source=str(REPO_ROOT))
+waybar_auto_hide = NixPackage("waybar_auto_hide", nix_source=NIX_REPO_ROOT)
+ghostty = NixPackage("ghostty", nix_source=NIX_REPO_ROOT, default_install=False)
 waybar = HostPackage(
     "waybar",
     sub_packages=[
@@ -400,7 +402,7 @@ Install_Config = Config(
                 "yazi",
             ],
         ),
-        "Apps": create_packages(["firefox", "ghostty"], default_install=False),
+        "Apps": create_packages(["firefox"], default_install=False) + [ghostty],
         "Editors": create_packages(
             [
                 Package(
@@ -410,7 +412,7 @@ Install_Config = Config(
                         Package(
                             "lolcat",
                             nix_name="lolcat-c",
-                            nix_source=str(REPO_ROOT),
+                            nix_source=NIX_REPO_ROOT,
                             void_name="lolcat-c",
                             arch_name="",
                         )

@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    nixgl = {
+      url = "github:nix-community/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     rose-pine-hyprcursor = {
       url = "github:ndom91/rose-pine-hyprcursor";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -18,6 +23,7 @@
     {
       self,
       nixpkgs,
+      nixgl,
       ...
     }@inputs:
     let
@@ -42,13 +48,17 @@
         ++ allPkgs;
       };
 
-      packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system: {
-        waybar_auto_hide = import ./nix/packages/waybar-auto-hide.nix {
-          pkgs = nixpkgs.legacyPackages.${system};
-        };
-        lolcat-c = import ./nix/packages/lolcat-c.nix {
-          pkgs = nixpkgs.legacyPackages.${system};
-        };
-      });
+      packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ nixgl.overlay ];
+          };
+        in
+        {
+          ghostty = import ./nix/packages/ghostty-wrapper.nix { inherit pkgs; };
+          waybar_auto_hide = import ./nix/packages/waybar-auto-hide.nix { inherit pkgs; };
+          lolcat-c = import ./nix/packages/lolcat-c.nix { inherit pkgs; };
+        });
     };
 }
