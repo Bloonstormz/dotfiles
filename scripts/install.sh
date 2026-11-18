@@ -9,6 +9,8 @@ source "$SCRIPT_DIR/lib/paths.sh"
 CONFIGURE=false
 DRY_RUN=false
 UPDATE_HOST=false
+SKIP_HOST=false
+SKIP_NIX=false
 while [[ "$#" -gt 0 ]]; do
 	flag="$1"
 	shift
@@ -27,10 +29,16 @@ while [[ "$#" -gt 0 ]]; do
 	-u | --update-host)
 		UPDATE_HOST=true
 		;;
+	-H | --no-host)
+		SKIP_HOST=true
+		;;
+	-N | --no-nix)
+		SKIP_NIX=true
+		;;
 	esac
 done
 
-if ! command -v nix >/dev/null 2>&1; then
+if [[ "$SKIP_NIX" == false ]] && ! command -v nix >/dev/null 2>&1; then
 	# shellcheck disable=SC2059
 	printf "${RED}ERROR${NORMAL}: nix is required to install these dotfiles\n"
 	exit 1
@@ -55,8 +63,7 @@ fi
 # Non nix-os based distros.
 # Prompt for certain settings and form a nix profile install <...> command accordingly
 
-SKIP_NIX=false
-if [[ -e "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/profile" ]] && ! [[ -z "$(nix profile list)" ]]; then
+if [[ "$SKIP_NIX" == false ]] && [[ -e "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/profile" ]] && ! [[ -z "$(nix profile list)" ]]; then
 	while true; do
 		if ! [[ -v reply ]]; then
 			printf "Nix profile already found! (d)elete, (A)dd onto it or (s)kip nix installs? "
@@ -64,7 +71,11 @@ if [[ -e "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/profile" ]] && ! [[
 		fi
 		case "${reply,,}" in
 		d | delete)
-			nix profile remove --all
+			if [[ "$DRY_RUN" == true ]]; then
+				printf "nix profile remove --all\n"
+			else
+				nix profile remove --all
+			fi
 			break
 			;;
 		"" | a | add)
@@ -99,7 +110,7 @@ will_install() {
 
 source "$CONFIG_FILE"
 
-if [[ "${#HOST_INSTALL[@]}" -gt 0 ]]; then
+if [[ "${#HOST_INSTALL[@]}" -gt 0 && "$SKIP_HOST" == false ]]; then
 	if command -v xbps-install &>/dev/null; then
 		if will_install "hypridle" "hyprlock"; then
 			if ! grep -q "repository=https://mirror.black-hole.dev/$(xbps-uhelper arch)" /etc/xbps.d/00-repository-main.conf &>/dev/null; then
