@@ -428,6 +428,7 @@ Install_Config = Config(
             HostPackage("SwayOSD", binary="swayosd-client", arch_name="swayosd"),
         ],
         "Launchers": [rofi, wofi],
+        "App Utilities": [HostPackage("dex")],
         "Idle": [HostPackage("hypridle"), HostPackage("hyprlock")],
         "Wallpapers": [
             HostPackage(

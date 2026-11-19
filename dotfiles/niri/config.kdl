@@ -1,6 +1,10 @@
 // Check the wiki for a full description of the configuration:
 //   https://yalter.github.io/niri/Configuration:-Introduction
 
+// Launch autostart apps according to the XDG autostart specification
+// Ref: https://wiki.archlinux.org/title/XDG_Autostart
+spawn-at-startup "dex" "--environment" "niri" "--autostart"
+
 // ----------------------------------------------------------------------------
 // Input devices (mouse, trackpad, keyboard, etc.)
 // ----------------------------------------------------------------------------
