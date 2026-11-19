@@ -32,13 +32,7 @@
 
 	"group/right": {
 		"orientation": "horizontal",
-		"modules": [
-			"bluetooth",
-			"group/group-volume",
-			"group/group-backlight",
-			"network",
-			"tray"
-		]
+		"modules": ["bluetooth", "group/group-volume", "network", "tray"]
 	},
 
 	"group/right-hidden": {
