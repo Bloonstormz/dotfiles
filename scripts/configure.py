@@ -134,6 +134,8 @@ class Package:
     package_configs: list[PackageConfig]
     sub_packages: list[Package]
 
+    comment: str
+
     def __init__(
         self,
         name: str,
@@ -143,12 +145,14 @@ class Package:
         void_name: str | None = None,
         arch_name: str | None = None,
         binary: str | None = None,
+        package_lookup: bool = False,  # Search using host package installer lookup instead of command -v
         display_name: str | None = None,
         allow_nix: bool = True,
         allow_host: bool = True,
         default_install: bool = True,
         package_configs: list[PackageConfig] | None = None,
         sub_packages: list[Package] | None = None,
+        comment: str = "",
     ) -> None:
         self.name = name.replace(" ", "_").replace("-", "_")
         self.display_name = name if display_name is None else display_name
@@ -167,9 +171,15 @@ class Package:
 
         if not ((CAN_SUDO and self.allow_host) or self.allow_nix):
             self.install = Action.DISABLED
-        elif (
-            not command_exists(binary if binary is not None else name)
-            and default_install
+        elif default_install and (
+            (
+                package_lookup
+                and lookup_package(arch_name=arch_name, void_name=void_name)
+            )
+            or (
+                (not package_lookup)
+                and (not command_exists(binary if binary is not None else name))
+            )
         ):
             if CAN_SUDO and self.allow_host:
                 self.install = Action.HOST_DOWNLOAD
@@ -180,6 +190,8 @@ class Package:
 
         self.package_configs = [] if package_configs is None else package_configs
         self.sub_packages = [] if sub_packages is None else sub_packages
+
+        self.comment = comment
 
     def set_action(self, action: Action) -> bool:
         if (
@@ -244,13 +256,30 @@ class PackageConfig:
         self.chosen = choices[0]
 
 
-def command_exists(command: str) -> bool:
+def check_rc(command: list[str]) -> bool:
     return not subprocess.run(
-        ["which", command],
+        command,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         check=False,
     ).returncode
+
+
+def command_exists(command: str) -> bool:
+    return check_rc(["which", command])
+
+
+def lookup_package(arch_name: str | None = None, void_name: str | None = None) -> bool:
+    if HOST_INSTALL == "xbps-install":
+        if void_name is None:
+            return False
+        return check_rc(["xbps-query", void_name])
+    elif HOST_INSTALL == "pacman":
+        if arch_name is None:
+            return False
+        return check_rc(["pacman", "-Qi", arch_name])
+    else:
+        raise NotImplementedError("Unsupported Host")
 
 
 sudo_check = subprocess.run(
@@ -385,6 +414,15 @@ swaync = HostPackage(
     sub_packages=[nwg_look],
 )
 
+# Portals
+# termfilechooser requires AUR for arch support. AUR is not supported currently
+termfilechooser = HostPackage(
+    "xdg-desktop-portal-termfilechooser",
+    arch_name="",
+    package_lookup=True,
+    comment="Allows choosing your own application as a file picker",
+)
+
 Install_Config = Config(
     {
         "Shell": create_packages(["bash", zsh, payRespects]) + [omz, p10k],
@@ -399,7 +437,7 @@ Install_Config = Config(
                 Package("ripgrep", binary="rg"),
                 "tmux",
                 "unzip",
-                "yazi",
+                Package("yazi", sub_packages=[termfilechooser]),
             ],
         ),
         "Apps": create_packages(["firefox"], default_install=False) + [ghostty],
@@ -554,7 +592,13 @@ def display(_win: curses.window):
                     else:
                         status = " "
                         extra = ""
-                    text = f"{'    ' * (depth + 1)}[{status}] {package.display_name}{extra}"
+
+                    if package.comment == "":
+                        comment = ""
+                    else:
+                        comment = f" - {package.comment}"
+
+                    text = f"{'    ' * (depth + 1)}[{status}] {package.display_name}{extra}{comment}"
                 else:
                     assert isinstance(package, PackageConfig)
                     text = f"{'    ' * (depth + 1)}{package.display_name}: {package.chosen}"
