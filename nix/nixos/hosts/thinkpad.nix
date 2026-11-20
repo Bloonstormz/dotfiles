@@ -18,6 +18,7 @@
     wallpapers.awww = true;
     wm.niri = true;
   };
+  misc.lolcat = true;
   launchers.rofi = true;
   services.displayManager.ly.enable = true;
 
