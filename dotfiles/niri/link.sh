@@ -8,7 +8,7 @@ run_link() {
 
 	{
 		# Save some lines by not needing a bunch of if statements. We can chain && instead if errexit is not set
-		set +x
+		set +e
 		command_exists "hypridle" && link_optional "hypridle.kdl"
 		command_exists "awww" && link_optional "awww.kdl"
 		command_exists "waybar_auto_hide" && link_optional "waybar-auto-hide.kdl"

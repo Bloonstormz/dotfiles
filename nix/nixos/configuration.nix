@@ -1,28 +1,28 @@
 {
-  config,
   pkgs,
-  lib,
   ...
 }:
 
 {
-  options = {
-    forMyUser = lib.mkOption {
-    };
-  };
-
   imports = [
-    ./modules/display.nix
     ./modules/audio.nix
     ./modules/networking.nix
     ./modules/lang.nix
+    ./modules/display/sway-nc.nix
+    ./modules/display/sway-osd.nix
+    ./modules/display/waybar.nix
+    ./modules/display/temperature/gammstep.nix
+    ./modules/display/temperature/hyprsunset.nix
+    ./modules/display/wallpapers/awww.nix
+    ./modules/display/wallpapers/hyprpaper.nix
+    ./modules/display/wm/hyprland.nix
+    ./modules/display/wm/niri.nix
+    ./modules/launchers/rofi.nix
+    ./modules/launchers/wofi.nix
+    ./modules/misc/lolcat.nix
   ];
 
   config = {
-    forMyUser = setting: {
-      minng01 = setting;
-    };
-
     nix.settings.experimental-features = [
       "nix-command"
       "flakes"
@@ -34,19 +34,13 @@
       nix-ld.enable = true;
     };
 
-    users.users = config.forMyUser {
+    users.users.minng01 = {
       isNormalUser = true;
       extraGroups = [
         "wheel"
         "networkmanager"
       ];
       shell = pkgs.zsh;
-    };
-
-    hjem.users = config.forMyUser {
-      xdg.config.files = {
-        pictures.source = ../../dotfiles/pictures;
-      };
     };
 
     environment.systemPackages = with pkgs; [
