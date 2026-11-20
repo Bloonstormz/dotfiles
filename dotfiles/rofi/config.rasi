@@ -42,7 +42,6 @@ configuration {
 	disable-history: false;
 
 	/*---------- Misc setting ----------*/
-	terminal: "alacritty";
 	sort: false;
 	threads: 0;
 
