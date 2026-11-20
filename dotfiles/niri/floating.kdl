@@ -47,6 +47,15 @@ window-rule {
 }
 
 window-rule {
+    match app-id="org.gnome.Calculator"
+
+    open-floating true
+    default-column-width { fixed 420; }
+    default-window-height { fixed 750; }
+    default-floating-position x=10 y=10 relative-to="top-right"
+}
+
+window-rule {
     match is-floating=true
 
     shadow {
