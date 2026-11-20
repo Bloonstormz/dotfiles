@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if ! command -v wl-copy &>/dev/null; then
+	~/.config/bin/notification error "$0" 'Missing wl-copy!'
+fi
+
+colour="$({
+	if [[ "$NIRI_SOCKET" ]]; then
+		niri msg pick-color | sed -n '2p' | awk '{print $2}'
+	else
+		~/.config/bin/notification error "$0" "Unsupported system to pick color"
+	fi
+})"
+
+~/.config/bin/notification info "$0" "Colour: ${colour}"

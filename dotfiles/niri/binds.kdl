@@ -34,7 +34,7 @@ binds {
     Mod+Ctrl+S       hotkey-overlay-title="Screenshot (window)" { spawn "~/.config/bin/screenshot" "monitor-window"; }
     Mod+Ctrl+Shift+S hotkey-overlay-title="Screenshot (monitor)" { spawn "~/.config/bin/screenshot" "monitor-focused"; }
 
-    Mod+Shift+P hotkey-overlay-title="Pick color" { spawn-sh "killall hyprpicker || hyprpicker --autocopy --lowercase-hex"; }
+    Mod+Shift+P hotkey-overlay-title="Pick color" { spawn-sh "~/.config/bin/pick-colour"; }
 
     // Notifications.
     Mod+N            hotkey-overlay-title="Show notification panel" { spawn "~/.config/bin/notification" "view"; }
