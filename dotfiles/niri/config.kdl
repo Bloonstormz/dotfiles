@@ -114,6 +114,7 @@ include optional=true "optional/hypridle.kdl"
 include optional=true "optional/sway-nc.kdl"
 include optional=true "optional/sway-osd.kdl"
 include optional=true "optional/waybar.kdl"
+include optional=true "optional/vesktop.kdl"
 
 // ----------------------------------------------------------------------------
 // Theme and personalized configs

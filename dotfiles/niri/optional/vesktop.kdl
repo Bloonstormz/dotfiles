@@ -1,0 +1,4 @@
+binds {
+	Alt+M		hotkey-overlay-title="Vesktop Mute" 	{ spawn-sh "echo 'run-shortcut toggleMute' | socat - UNIX-CONNECT:/run/user/1000/vesktop.sock"; }
+	Alt+L		hotkey-overlay-title="Vesktop Deafen" 	{ spawn-sh "echo 'run-shortcut toggleDeafen' | socat - UNIX-CONNECT:/run/user/1000/vesktop.sock"; }
+}
