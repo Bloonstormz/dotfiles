@@ -11,7 +11,7 @@ import re
 import subprocess
 import sys
 from enum import Enum
-from typing import Any
+from typing import Any, NotRequired, TypedDict
 
 if os.name == "nt":
     print("Not runnable on Windows!")
@@ -33,6 +33,12 @@ class Action(Enum):
     NIX_DOWNLOAD = 2
 
     DISABLED = 3  # Requires host installation, but no sudo access
+
+
+class NixOSConfig(TypedDict):
+    config: str
+    isSysPackage: NotRequired[bool]
+    isFontPackage: NotRequired[bool]
 
 
 WILL_INSTALL = (Action.HOST_DOWNLOAD, Action.NIX_DOWNLOAD)
@@ -66,10 +72,14 @@ class Config:
             itertools.chain(*(pkg.package_configs for pkg in self.all_packages))
         )
 
-    def write_config(self, file: pathlib.Path):
+    def write_config(self, file: pathlib.Path, nixos_file: pathlib.Path):
         res: list[str] = ["HOST_INSTALL=()", "NIX_INSTALL=()"]
+        nixos_config: list[str] = ["{ pkgs, ... }:", "{"]
         host_install: list[str] = []
         nix_install: list[str] = []
+
+        nix_sys_pkgs: list[str] = []
+        nix_font_pkgs: list[str] = []
 
         for package in self.all_packages:
             pkg_type = "false"
@@ -79,8 +89,17 @@ class Config:
                         res.append(f"CFG_{config.name}={config.chosen}")
 
                 if package.install == Action.HOST_DOWNLOAD:
-                    host_install.append(package.host_name)
                     pkg_type = "host"
+                    if HOST_INSTALL == "NixOS":
+                        config = package.nix_os_config
+                        if config.get("isSysPackage", False):
+                            nix_sys_pkgs.append(config["config"])
+                        elif config.get("isFontPackage", False):
+                            nix_font_pkgs.append(config["config"])
+                        else:
+                            nixos_config.append(f"{config['config']};")
+                    else:
+                        host_install.append(package.host_name)
                 elif package.install == Action.NIX_DOWNLOAD:
                     nix_install.append(f"{package.nix_source}#{package.nix_name}")
                     pkg_type = "nix"
@@ -92,6 +111,20 @@ class Config:
 
         with open(file, "w") as f:
             f.write("\n".join(res))
+
+        if HOST_INSTALL == "NixOS":
+            if len(nix_sys_pkgs) > 0:
+                nixos_config.append("environment.systemPackages = [")
+                nixos_config.extend(nix_sys_pkgs)
+                nixos_config.append("];")
+            if len(nix_font_pkgs) > 0:
+                nix_font_pkgs.append("fonts.packages = [")
+                nix_font_pkgs.extend(nix_sys_pkgs)
+                nix_font_pkgs.append("];")
+
+            nixos_config.append("}")
+            with open(nixos_file, "w") as f:
+                f.write("\n".join(nixos_config))
 
     def load_config(self, file: pathlib.Path):
         with open(file, "r") as f:
@@ -130,6 +163,7 @@ class Package:
     nix_name: str
     nix_source: str
     host_name: str
+    nix_os_config: NixOSConfig
 
     package_configs: list[PackageConfig]
     sub_packages: list[Package]
@@ -144,6 +178,7 @@ class Package:
         nix_source: str = f"nixpkgs{nixpkg_rev}",
         void_name: str | None = None,
         arch_name: str | None = None,
+        nix_os_config: NixOSConfig | None = None,
         binary: str | None = None,
         package_lookup: bool = False,  # Search using host package installer lookup instead of command -v
         display_name: str | None = None,
@@ -162,10 +197,16 @@ class Package:
 
         self.nix_name = nix_name if nix_name is not None else name
         self.nix_source = nix_source
-        if HOST_INSTALL == "xbps-install":
+        if HOST_INSTALL == "VoidLinux":
             self.__set_host_name(void_name)
-        elif HOST_INSTALL == "pacman":
+        elif HOST_INSTALL == "ArchLinux":
             self.__set_host_name(arch_name)
+        elif HOST_INSTALL == "NixOS":
+            self.host_name = name
+            if nix_os_config is None:
+                self.nix_os_config = {"config": f"pkgs.{name}", "isSysPackage": True}
+            else:
+                self.nix_os_config = nix_os_config
         else:
             raise ValueError(f"Unexpected host installer: '{HOST_INSTALL}'")
 
@@ -213,9 +254,12 @@ class Package:
             options.append(Action.NIX_DOWNLOAD)
         self.install = options[(options.index(self.install) + 1) % len(options)]
 
-    def __set_host_name(self, name: str | None):
+    def __set_host_name(self, name: str | None, default: str | None = None):
         if name is None:
-            self.host_name = self.name
+            if default is not None:
+                self.host_name = default
+            else:
+                self.host_name = self.name
         elif name == "":
             self.host_name = ""
             self.allow_host = False
@@ -270,11 +314,11 @@ def command_exists(command: str) -> bool:
 
 
 def lookup_package(arch_name: str | None = None, void_name: str | None = None) -> bool:
-    if HOST_INSTALL == "xbps-install":
+    if HOST_INSTALL == "VoidLinux":
         if void_name is None:
             return False
         return check_rc(["xbps-query", void_name])
-    elif HOST_INSTALL == "pacman":
+    elif HOST_INSTALL == "ArchLinux":
         if arch_name is None:
             return False
         return check_rc(["pacman", "-Qi", arch_name])
@@ -288,11 +332,11 @@ sudo_check = subprocess.run(
 CAN_SUDO = sudo_check.returncode == 0 or sudo_check.stderr.startswith("sudo:")
 
 if command_exists("xbps-install"):
-    HOST_INSTALL = "xbps-install"
+    HOST_INSTALL = "VoidLinux"
 elif command_exists("pacman"):
-    HOST_INSTALL = "pacman"
+    HOST_INSTALL = "ArchLinux"
 elif command_exists("nixos-rebuild"):
-    raise NotImplementedError("TODO: Nix support")
+    HOST_INSTALL = "NixOS"
 else:
     raise NotImplementedError("Unsupported Host")
 
@@ -674,6 +718,7 @@ def display(_win: curses.window):
 
 if __name__ == "__main__":
     config_file = REPO_ROOT / ".config"
+    nixos_file = REPO_ROOT / "nix/nixos/gen_config"
 
     if config_file.is_file():
         Install_Config.load_config(config_file)
@@ -681,6 +726,6 @@ if __name__ == "__main__":
     rc = curses.wrapper(display)
 
     if rc == 0:
-        Install_Config.write_config(config_file)
+        Install_Config.write_config(config_file, nixos_file)
 
     sys.exit(rc)

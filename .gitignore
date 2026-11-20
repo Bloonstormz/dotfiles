@@ -5,5 +5,6 @@ dotfiles/**/*local*
 dotfiles/rofi/themes/colours/colours.rasi
 dotfiles/swaync/colours/colours.css
 dotfiles/waybar/colours/colours.css
+nix/nixos/gen_config
 result
 .config
