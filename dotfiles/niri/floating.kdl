@@ -72,4 +72,6 @@ window-rule {
         active-color "#7fc8ff"
         inactive-color "#505050"
     }
+
+    default-column-width { proportion 0.5; }
 }
