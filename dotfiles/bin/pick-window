@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+~/.config/bin/notification test "$0" jaq
+
+if [[ "$NIRI_SOCKET" ]]; then
+	mapfile -t lines < <(niri msg --json pick-window | jaq -r '.title,.app_id')
+	printf "%s\n" "${lines[@]}"
+	title="${lines[0]}"
+	app_id="${lines[1]}"
+else
+	~/.config/bin/notification error "$0" "Unsupported system to pick color"
+	exit 1
+fi
+
+~/.config/bin/notification info "$0" "Title: ${title}"$'\n'"App ID: ${app_id}"

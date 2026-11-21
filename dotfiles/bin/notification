@@ -17,14 +17,23 @@ create_notif() {
 	case "$type" in
 	error)
 		icon="dialog-error"
+		msg=("$@")
 		;;
 	info)
 		icon="dialog-information"
+		msg=("$@")
+		;;
+	test)
+		if command -v "$1" &>/dev/null; then
+			exit 0
+		fi
+		icon="dialog-error"
+		msg="Missing $1!"
 		;;
 	esac
 	notify-send --icon "$icon" \
 		--app-name "$app_name" \
-		"${@}"
+		"$msg"
 }
 
 case "${1:-dismiss}" in
