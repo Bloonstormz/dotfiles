@@ -58,7 +58,7 @@
 				{
 					"label": "󰌪",
 					"type": "toggle",
-					"command": "~/.local/bin/powerprofile --toggle-quiet",
+					"command": "~/.config/bin/powerprofile --toggle-quiet",
 					"update-command": "~/.config/bin/powerprofile --is-quiet"
 				},
 				{
