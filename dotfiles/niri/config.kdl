@@ -74,6 +74,14 @@ layout {
 }
 
 // ----------------------------------------------------------------------------
+// Named workspaces
+// ----------------------------------------------------------------------------
+
+workspace "terminal"
+workspace "browser"
+workspace "games"
+
+// ----------------------------------------------------------------------------
 // Window / layer rules
 // ----------------------------------------------------------------------------
 
@@ -89,14 +97,11 @@ window-rule {
 
     block-out-from "screencast"
 }
+window-rule {
+    match app-id=r#"^steam_app_[0-9]+$"#
 
-// ----------------------------------------------------------------------------
-// Named workspaces
-// ----------------------------------------------------------------------------
-
-workspace "terminal"
-workspace "browser"
-workspace "games"
+    open-on-workspace "games"
+}
 
 environment {
     EDITOR "nvim"
