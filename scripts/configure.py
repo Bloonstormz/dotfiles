@@ -482,6 +482,7 @@ Install_Config = Config(
                 "tmux",
                 "unzip",
                 Package("yazi", sub_packages=[termfilechooser]),
+                Package("jaq", comment="Faster version of jq"),
             ],
         ),
         "Apps": create_packages(["firefox"], default_install=False) + [ghostty],

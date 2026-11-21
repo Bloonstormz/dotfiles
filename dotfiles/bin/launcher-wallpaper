@@ -6,12 +6,8 @@ fi
 if ! command -v awww &>/dev/null; then
 	exit 1
 fi
-if [[ "$#" -lt 1 ]]; then
-	launcher="$("$HOME/.config/bin/get_launcher")"
-else
-	launcher="$1"
-	shift
-fi
+
+launcher="$("$HOME/.config/bin/get_launcher")"
 
 mapfile -t WALLPAPER_PATHS < <(
 	find -L "$(realpath "$HOME/.config/Wallpapers")" -mindepth 1 -maxdepth 1 -type f | sort
@@ -54,27 +50,47 @@ pick_wallpaper() {
 	picker_"$launcher"
 }
 
-WALLPAPER_THUMBNAILS=()
-if command -v "ffmpeg" &>/dev/null; then
-	thumbnail_dir="$HOME/.cache/Wallpapers/thumbnails"
-	mkdir -p -- "$thumbnail_dir"
-	for wallpaper in "${WALLPAPER_PATHS[@]}"; do
-		path="$thumbnail_dir/$(basename "$wallpaper")"
-		if ! [[ -e "$path" ]]; then
-			ffmpeg -i "$wallpaper" "-vf" "scale='if(gt(iw,ih),500,-1)':'if(gt(iw,ih),-1,500)'" \
-				-frames:v 1 -q:v 5 -update 1 "$path"
-		fi
-		WALLPAPER_THUMBNAILS+=(
-			"$path"
-		)
-	done
-fi
-
 case "${1:-pick}" in
 set)
 	awww img "$2"
 	;;
+cycle)
+	if ! command -v jaq &>/dev/null; then
+		~/.config/bin/notification error "$0" "Missing jaq binary"
+		exit 1
+	fi
+	cur_image="$(awww query -j | jaq -r '.""[0].displaying.image')"
+
+	next=false
+	for file in "${WALLPAPER_PATHS[@]}"; do
+		if [[ "$next" == true ]]; then
+			awww img "$file"
+			exit 0
+		fi
+		realpath $file
+		if [[ "$cur_image" == "$(realpath "$file")" ]]; then
+			next=true
+		fi
+	done
+	awww img "${WALLPAPER_PATHS[0]}"
+	;;
 pick)
+	WALLPAPER_THUMBNAILS=()
+	if command -v "ffmpeg" &>/dev/null; then
+		thumbnail_dir="$HOME/.cache/Wallpapers/thumbnails"
+		mkdir -p -- "$thumbnail_dir"
+		for wallpaper in "${WALLPAPER_PATHS[@]}"; do
+			path="$thumbnail_dir/$(basename "$wallpaper")"
+			if ! [[ -e "$path" ]]; then
+				ffmpeg -i "$wallpaper" "-vf" "scale='if(gt(iw,ih),500,-1)':'if(gt(iw,ih),-1,500)'" \
+					-frames:v 1 -q:v 5 -update 1 "$path"
+			fi
+			WALLPAPER_THUMBNAILS+=(
+				"$path"
+			)
+		done
+	fi
+
 	chosen="$(pick_wallpaper)"
 	[[ -e "$chosen" ]] && awww img "$chosen"
 	;;

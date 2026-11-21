@@ -18,10 +18,7 @@ recent-windows {
 
 binds {
     // Overview.
-    Mod+Grave          hotkey-overlay-title="System menu" { spawn "dfr-menu"; }
-    Mod+Slash          hotkey-overlay-title="Search niri keybinds" { spawn "walker" "--height" "980" "--width" "980" "--provider" "menus:keybinds"; }
-    Mod+Shift+Slash    hotkey-overlay-title="Search niri actions" { spawn "walker" "--height" "980" "--width" "980" "--provider" "niriactions"; }
-    Mod+Ctrl+Slash     hotkey-overlay-title="Search Waybar actions" { spawn "walker" "--height" "980" "--width" "800" "--provider" "menus:waybar"; }
+    Mod+Grave          hotkey-overlay-title="System menu" { spawn "~/.config/bin/launcher-logout"; }
     Mod+Tab repeat=false hotkey-overlay-title="Toggle overview (4-finger swipe)" { toggle-overview; }
 
     // System.
@@ -42,10 +39,11 @@ binds {
     Mod+Ctrl+N       hotkey-overlay-title="Dismiss all notifications" { spawn "~/.config/bin/notification" "dismiss-all"; }
 
     // Themes.
-    Mod+BackSlash            hotkey-overlay-title="Cycle theme's wallpapers" { spawn "dfr-theme-set-bg"; }
-    Mod+Shift+BackSlash      hotkey-overlay-title="Pick theme's wallpapers" { spawn "dfr-theme-set-bg" "--menu"; }
-    Mod+Ctrl+BackSlash       hotkey-overlay-title="Cycle themes" { spawn "dfr-theme-set"; }
-    Mod+Ctrl+Shift+BackSlash hotkey-overlay-title="Pick theme" { spawn "dfr-theme-set" "--menu"; }
+    Mod+BackSlash            hotkey-overlay-title="Cycle theme's wallpapers" { spawn "~/.config/bin/launcher-wallpaper" "cycle"; }
+    Mod+Shift+BackSlash      hotkey-overlay-title="Pick theme's wallpapers" { spawn "~/.config/bin/launcher-wallpaper"; }
+    // TODO: Theme switching
+    Mod+Ctrl+BackSlash       hotkey-overlay-title="Cycle themes" { spawn "~/.config/bin/themesw"; }
+    Mod+Ctrl+Shift+BackSlash hotkey-overlay-title="Pick theme" { spawn "~/.config/bin/themesw"; }
 
     // Media keys.
     XF86AudioRaiseVolume allow-when-locked=true hotkey-overlay-title="Raise volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
