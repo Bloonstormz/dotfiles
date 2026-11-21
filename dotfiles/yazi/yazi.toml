@@ -10,6 +10,8 @@ image_delay = 100
 
 [opener]
 edit = [{ run = "nvim %s", block = true, desc = "Neovim" }]
+open = [{ run = "xdg-open %s1", desc = "Open" }]
 
 [open]
 rules = [{ mime = "text/*", use = "edit" }]
+append_rules = [{ url = "*", use = "open" }]
