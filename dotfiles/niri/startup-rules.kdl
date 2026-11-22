@@ -3,7 +3,7 @@ window-rule {
 	match at-startup=true app-id="vesktop"
 
 	open-focused false
-	open-on-workspace "games"
+	open-on-workspace "social"
 }
 
 window-rule {

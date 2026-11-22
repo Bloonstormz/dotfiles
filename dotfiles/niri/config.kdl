@@ -79,6 +79,7 @@ layout {
 
 workspace "terminal"
 workspace "browser"
+workspace "social"
 workspace "games"
 
 // ----------------------------------------------------------------------------
