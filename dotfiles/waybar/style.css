@@ -10,6 +10,13 @@
 	text-shadow: none;
 }
 
+.modules-left {
+    padding: 0px 0px 0px 4px;
+}
+.modules-right {
+    padding: 0px 4px 0px 0px;
+}
+
 #waybar {
     font-weight: 700;
     background: transparent;
@@ -115,6 +122,9 @@
 #custom-start,
 #custom-ctlcenter {
     color: @blue;
+}
+#custom-separator {
+    color: @inactive
 }
 
 #workspaces button {

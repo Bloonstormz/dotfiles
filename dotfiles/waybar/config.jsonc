@@ -32,7 +32,7 @@
 
 	"group/right": {
 		"orientation": "horizontal",
-		"modules": ["bluetooth", "group/group-volume", "network", "tray"]
+		"modules": ["group/group-volume", "custom/separator", "tray"]
 	},
 
 	"group/right-hidden": {
@@ -252,6 +252,10 @@
 	"custom/start": {
 		"format": "",
 		"on-click": "~/.config/bin/toggle_launcher drun &"
+	},
+
+	"custom/separator": {
+		"format": "|"
 	},
 
 	"custom/ctlcenter": {

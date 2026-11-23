@@ -1,5 +1,5 @@
 {
-	"$schema": "/etc/xdg/swaync/configschema.json",
+	"$schema": "/etc/xdg/swaync/configSchema.json",
 	"positionX": "right",
 	"positionY": "top",
 	"cssPriority": "user",
@@ -10,7 +10,6 @@
 	"layer-shell-cover-screen": false,
 
 	"notification-window-width": 400,
-	"notification-icon-size": 40,
 	"notification-body-image-height": 500,
 	"notification-body-image-width": 500,
 	"notification-inline-replies": true,
@@ -30,25 +29,11 @@
 	"widgets": ["mpris", "dnd", "notifications", "buttons-grid"],
 
 	"widget-config": {
-		"backlight": {
-			"device": "amdgpu_bl1",
-			"label": "󰃠",
-			"slider": true,
-			"min": 10
-		},
-		"volume": {
-			"device": "default",
-			"label": "",
-			"slider": true
-		},
-
 		"dnd": {
 			"text": "Do not disturb"
 		},
 
 		"mpris": {
-			"image-size": 100,
-			"image-radius": 10,
 			"autohide": false,
 			"blacklist": ["org.mpris.MediaPlayer2.playerctld"]
 		},
