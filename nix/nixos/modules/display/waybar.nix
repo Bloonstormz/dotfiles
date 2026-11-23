@@ -28,5 +28,9 @@ in
         else
           [ ]
       );
+
+    fonts.packages = with pkgs; [
+      nerd-fonts.caskaydia-cove
+    ];
   };
 }
