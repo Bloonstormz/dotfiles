@@ -71,13 +71,15 @@ layout {
     focus-ring {
         width 1
     }
+
+    empty-workspace-above-first
+    center-focused-column "on-overflow"
 }
 
 // ----------------------------------------------------------------------------
 // Named workspaces
 // ----------------------------------------------------------------------------
 
-workspace "terminal"
 workspace "browser"
 workspace "social"
 workspace "games"
@@ -88,7 +90,7 @@ workspace "games"
 
 window-rule {
     // Slight rounded corners.
-    geometry-corner-radius 2
+    geometry-corner-radius 8
     clip-to-geometry true
     default-column-width { proportion 1.0; }
 }
@@ -106,6 +108,10 @@ window-rule {
 
 environment {
     EDITOR "nvim"
+}
+
+debug {
+    honor-xdg-activation-with-invalid-serial
 }
 
 include "floating.kdl"
