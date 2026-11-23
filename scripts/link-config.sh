@@ -107,7 +107,13 @@ command_exists() {
 }
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
-[[ -e "$REPO_ROOT/.config" ]] && source "$REPO_ROOT/.config"
+if [[ -e "$REPO_ROOT/.config" ]]; then
+	# Any environment variables set beforehand should take
+	# precendence over those in .config
+	SAVED_ENV="$(export)"
+	source "$REPO_ROOT/.config"
+	eval "$SAVED_ENV"
+fi
 for package in "${packages[@]}"; do
 	if [[ -f "${package}/link.sh" ]]; then
 		# shellcheck disable=SC1091
