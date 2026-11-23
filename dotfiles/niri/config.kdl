@@ -74,15 +74,19 @@ layout {
 
     empty-workspace-above-first
     center-focused-column "on-overflow"
+    default-column-width { proportion 1.0; }
 }
 
 // ----------------------------------------------------------------------------
 // Named workspaces
 // ----------------------------------------------------------------------------
 
-workspace "browser"
-workspace "social"
-workspace "games"
+// Enable these options if you have only a single monitor
+// With multiple monitors, I recommend setting the `open-on-output`
+//  config in local-config.kdl for better control instead 
+// workspace "browser"
+// workspace "social"
+// workspace "games"
 
 // ----------------------------------------------------------------------------
 // Window / layer rules
@@ -92,7 +96,6 @@ window-rule {
     // Slight rounded corners.
     geometry-corner-radius 8
     clip-to-geometry true
-    default-column-width { proportion 1.0; }
 }
 
 window-rule {
@@ -133,4 +136,4 @@ include optional=true "optional/vesktop.kdl"
 // ----------------------------------------------------------------------------
 
 include optional=true "theme.kdl"
-include optional=true "config.kdl.local"
+include optional=true "local-config.kdl"
