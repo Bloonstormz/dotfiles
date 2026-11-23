@@ -178,7 +178,7 @@ class Package:
         nix_source: str = f"nixpkgs{nixpkg_rev}",
         void_name: str | None = None,
         arch_name: str | None = None,
-        nix_os_config: NixOSConfig | None = None,
+        nix_os_config: NixOSConfig | str | None = None,
         binary: str | None = None,
         package_lookup: bool = False,  # Search using host package installer lookup instead of command -v
         display_name: str | None = None,
@@ -206,7 +206,10 @@ class Package:
             if nix_os_config is None:
                 self.nix_os_config = {"config": f"pkgs.{name}", "isSysPackage": True}
             else:
-                self.nix_os_config = nix_os_config
+                if isinstance(nix_os_config, str):
+                    self.nix_os_config = {"config": nix_os_config}
+                else:
+                    self.nix_os_config = nix_os_config
         else:
             raise ValueError(f"Unexpected host installer: '{HOST_INSTALL}'")
 
@@ -403,7 +406,8 @@ wlclipboard = Package(
     binary="wl-copy",
 )
 
-zsh = Package("zsh")
+bash = Package("bash", nix_os_config="programs.bash.enable=true")
+zsh = Package("zsh", nix_os_config="programs.zsh.enable=true")
 omz = Package(
     "oh_my_zsh",
     allow_host=False,
@@ -426,6 +430,7 @@ niri = HostPackage(
     "niri",
     package_configs=[PackageConfig("DISPLAY_THEME", ["Light", "Dark"], "Theme")],
     sub_packages=[cliphist, wlclipboard],
+    nix_os_config="display.wm.nix=true",
 )
 waybar_auto_hide = NixPackage("waybar_auto_hide", nix_source=NIX_REPO_ROOT)
 ghostty = NixPackage("ghostty", nix_source=NIX_REPO_ROOT, default_install=False)
@@ -441,11 +446,12 @@ waybar = HostPackage(
         blueman,
     ],
     void_name="Waybar",
+    nix_os_config="display.waybar.enable=true",
 )
 
 # Launchers
-rofi = HostPackage("rofi")
-wofi = HostPackage("wofi")
+rofi = HostPackage("rofi", nix_os_config="launchers.rofi=true")
+wofi = HostPackage("wofi", nix_os_config="launchers.wofi=true")
 
 # Notifications
 
@@ -456,6 +462,7 @@ swaync = HostPackage(
     binary="swaync",
     display_name="Sway Notification Centre",
     sub_packages=[nwg_look],
+    nix_os_config="display.sway-nc=true",
 )
 
 # Portals
@@ -469,27 +476,39 @@ termfilechooser = HostPackage(
 
 Install_Config = Config(
     {
-        "Shell": create_packages(["bash", zsh, payRespects]) + [omz, p10k],
+        "Shell": create_packages([bash, zsh, payRespects]) + [omz, p10k],
         "Terminal Utilities": create_packages(
             [
-                "bat",
+                Package("bat", nix_os_config="programs.bat.enable=true"),
                 Package("delta", arch_name="git-delta"),
                 "fd",
                 "fzf",
-                "git",
-                "lazygit",
+                Package("git", nix_os_config="programs.git.enable=true"),
+                Package("lazygit", nix_os_config="programs.lazygit.enable=true"),
                 Package("ripgrep", binary="rg"),
-                "tmux",
+                Package("tmux", nix_os_config="programs.tmux.enable=true"),
                 "unzip",
-                Package("yazi", sub_packages=[termfilechooser]),
+                Package(
+                    "yazi",
+                    nix_os_config="programs.yazi.enable=true",
+                    sub_packages=[termfilechooser],
+                ),
                 Package("jaq", comment="Faster version of jq"),
             ],
         ),
-        "Apps": create_packages(["firefox"], default_install=False) + [ghostty],
+        "Apps": [
+            Package(
+                "firefox",
+                nix_os_config="programs.firefox.enable=true",
+                default_install=False,
+            ),
+            ghostty,
+        ],
         "Editors": create_packages(
             [
                 Package(
                     "neovim",
+                    nix_os_config="programs.neovim.enable=true",
                     binary="nvim",
                     sub_packages=[
                         Package(
@@ -507,15 +526,24 @@ Install_Config = Config(
             niri,
             waybar,
             swaync,
-            HostPackage("gammastep"),
-            HostPackage("SwayOSD", binary="swayosd-client", arch_name="swayosd"),
+            HostPackage(
+                "gammastep", nix_os_config="display.temperature.gammastep=true"
+            ),
+            HostPackage(
+                "SwayOSD",
+                binary="swayosd-client",
+                arch_name="swayosd",
+                nix_os_config="display.sway-osd=true",
+            ),
         ],
         "Launchers": [rofi, wofi],
         "App Utilities": [HostPackage("dex")],
         "Idle": [HostPackage("hypridle"), HostPackage("hyprlock")],
         "Wallpapers": [
             HostPackage(
-                "awww", display_name="An Answer to your Wayland Wallpaper Woes (awww)"
+                "awww",
+                display_name="An Answer to your Wayland Wallpaper Woes (awww)",
+                nix_os_config="display.wallpapers.awww=true",
             )
         ],
         "Screenshot": [
