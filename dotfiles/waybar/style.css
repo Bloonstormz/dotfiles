@@ -135,6 +135,9 @@
     margin: 0 3px;
     min-width: 16px;
 }
+#workspaces button.urgent {
+    color: @yellow;
+}
 /* 
 #workspaces button.empty:not(.active) {
     color: @inactive;
