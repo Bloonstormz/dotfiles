@@ -14,6 +14,8 @@ in
   };
 
   config = lib.mkIf cfg {
+    qt.style = "breeze";
+
     programs.niri.enable = true;
 
     services.hypridle.enable = true;

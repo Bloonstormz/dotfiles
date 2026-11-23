@@ -15,6 +15,8 @@ in
   };
 
   config = lib.mkIf cfg {
+    qt.style = "breeze";
+
     programs = {
       hyprland = {
         enable = true;
