@@ -90,6 +90,10 @@ link_files() {
 	local source_dir="$1"
 	local destination_dir="$2"
 
+	if ! [[ -e "$source_dir" ]]; then
+		return 0
+	fi
+
 	mapfile -t files < <(
 		find "$source_dir" -maxdepth 1 -mindepth 1 -type f -not -name link.sh
 	)
