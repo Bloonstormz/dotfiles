@@ -29,6 +29,7 @@
     ];
 
     boot.kernelPackages = pkgs.linuxPackages_latest;
+    xdg.autostart.enable = true;
 
     programs = {
       nix-ld.enable = true;
@@ -49,6 +50,8 @@
       nix-search
       nix-index
     ];
+
+    services.power-profiles-daemon.enable = true;
 
     time.timeZone = "Europe/London";
 
