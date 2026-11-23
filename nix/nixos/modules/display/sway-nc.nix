@@ -15,6 +15,7 @@ in
 
   config = lib.mkIf cfg {
     environment.systemPackages = with pkgs; [
+      libnotify
       swaynotificationcenter
       nwg-look
     ];
