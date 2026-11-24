@@ -1,0 +1,36 @@
+// ----------------------------------------------------------------------------
+// Window / layer rules
+// ----------------------------------------------------------------------------
+
+window-rule {
+    // Slight rounded corners.
+    geometry-corner-radius 8
+    clip-to-geometry true
+
+    background-effect {
+        blur true
+        xray true
+    }
+    popups {
+        background-effect {
+            blur true
+            xray true
+        }
+    }
+}
+
+window-rule {
+    match app-id=r#"^KeePassXC$"#
+
+    block-out-from "screencast"
+}
+window-rule {
+    match app-id=r#"^steam_app_[0-9]+$"#
+
+    open-on-workspace "games"
+}
+window-rule {
+	match app-id="vesktop"
+
+	draw-border-with-background false
+}

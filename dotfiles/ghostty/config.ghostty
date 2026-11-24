@@ -5,3 +5,6 @@ clipboard-read = allow
 keybind = ctrl+shift+w=unbind
 keybind = alt+arrow_right=next_tab
 keybind = alt+arrow_left=previous_tab
+
+background-blur = true
+background-opacity = 0.82
