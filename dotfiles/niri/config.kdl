@@ -31,6 +31,8 @@ input {
 
         // Disable acceleration.
         accel-profile "flat"
+
+        dwt
     }
 
     mouse {
