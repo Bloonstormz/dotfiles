@@ -30,19 +30,28 @@ format_dmenu() {
 	done
 }
 
+rofi_cmd() {
+	rofi -dmenu -sync -theme "$HOME/.config/rofi/themes/wallpapers.rasi"
+}
+wofi_cmd() {
+	wofi --dmenu
+}
+launcher_cmd() {
+	"$launcher"_cmd
+}
+
 picker_rofi() {
 	if [[ "${#WALLPAPER_THUMBNAILS[@]}" -eq 0 ]]; then
-		printf "%s\n" "${WALLPAPER_PATHS[@]}" | rofi -dmenu -sync -theme "$HOME/.config/rofi/themes/wallpapers.rasi"
+		printf "%s\n" "${WALLPAPER_PATHS[@]}" | rofi_cmd
 	else
-		format_dmenu "%s\x00icon\x1f%s" | rofi -dmenu -sync -theme "$HOME/.config/rofi/themes/wallpapers.rasi"
+		format_dmenu "%s\x00icon\x1f%s" | rofi_cmd
 	fi
 }
 picker_wofi() {
-	wofi --dmenu
 	if [[ "${#WALLPAPER_THUMBNAILS[@]}" -eq 0 ]]; then
-		printf "%s\n" "${WALLPAPER_PATHS[@]}" | wofi --dmenu
+		printf "%s\n" "${WALLPAPER_PATHS[@]}" | wofi_cmd
 	else
-		format_dmenu "img:%s:text:%s" -i | wofi --dmenu
+		format_dmenu "img:%s:text:%s" -i | wofi_cmd
 	fi
 }
 
@@ -59,20 +68,31 @@ cycle)
 		~/.config/bin/notification error "$0" "Missing jaq binary"
 		exit 1
 	fi
-	cur_image="$(awww query -j | jaq -r '.""[0].displaying.image')"
+	mapfile -t cur_status < <(awww query -j | jaq -r '.""[] | .name,.displaying.image')
 
-	next=false
-	for file in "${WALLPAPER_PATHS[@]}"; do
-		if [[ "$next" == true ]]; then
-			awww img "$file"
-			exit 0
+	idx=0
+	while [[ "$idx" -lt "${#cur_status[@]}" ]]; do
+		display="${cur_status[$idx]}"
+		img="${cur_status[$((idx + 1))]}"
+
+		next=unset
+		for file in "${WALLPAPER_PATHS[@]}"; do
+			if [[ "$next" == true ]]; then
+				awww img "$file" -o "$display"
+				break
+			fi
+			realpath $file
+			if [[ "$cur_image" == "$(realpath "$file")" ]]; then
+				next=true
+			fi
+		done
+		if [[ "$next" == unset ]]; then
+			awww img "${WALLPAPER_PATHS[0]}" -o "$display"
 		fi
-		realpath $file
-		if [[ "$cur_image" == "$(realpath "$file")" ]]; then
-			next=true
-		fi
+
+		idx=$((idx + 2))
 	done
-	awww img "${WALLPAPER_PATHS[0]}"
+
 	;;
 pick)
 	WALLPAPER_THUMBNAILS=()
@@ -92,6 +112,22 @@ pick)
 	fi
 
 	chosen="$(pick_wallpaper)"
-	[[ -e "$chosen" ]] && awww img "$chosen"
+	if [[ -e "$chosen" ]]; then
+		mapfile -t monitors < <(awww query -j | jaq -r '.""[].name')
+		if [[ "${#monitors[@]}" -gt 1 ]]; then
+			target="$({
+				printf "%s\n" "${monitors[@]}"
+				echo "All"
+			} | launcher_cmd)"
+
+			if [[ "$target" == All ]]; then
+				awww img "$chosen"
+			else
+				awww img "$chosen" -o "$target"
+			fi
+		else
+			awww img "$chosen"
+		fi
+	fi
 	;;
 esac
