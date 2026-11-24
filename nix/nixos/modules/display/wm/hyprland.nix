@@ -34,6 +34,7 @@ in
     environment.systemPackages = with pkgs; [
       dex
       hyprcursor
+      wl-clipboard
       inputs.rose-pine-hyprcursor.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.snappy-switcher.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
