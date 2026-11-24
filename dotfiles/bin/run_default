@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
 
+if ! [[ -e "$HOME/.config/defaults" ]]; then
+	~/.config/bin/notification "error" "$0" "Missing ~/.config/defaults. Could not determine default applications"
+fi
+
 source "$HOME/.config/defaults"
 
 type="$1"
 shift
 case "$type" in
 terminal)
-	exec $TERMINAL "$@"
+	exec "${TERMINAL[@]}" "$@"
 	;;
 browser)
-	exec $BROWSER "$@"
+	exec "${BROWSER[@]}" "$@"
+	;;
+"private-browser")
+	exec "${PRIVATE_BROWSER[@]}" "$@"
+	;;
+"file-manager")
+	exec "${FILE_MANAGER[@]}" "$@"
+	;;
+lock)
+	exec "${LOCK[@]}" "$@"
 	;;
 esac

@@ -22,7 +22,7 @@ binds {
     Mod+Tab repeat=false hotkey-overlay-title="Toggle overview (4-finger swipe)" { toggle-overview; }
 
     // System.
-    Mod+Shift+L        hotkey-overlay-title="Lock screen" { spawn "hyprlock"; }
+    Mod+Shift+L        hotkey-overlay-title="Lock screen" { spawn "~/.config/bin/run_default" "lock"; }
     Mod+Shift+Alt+L  hotkey-overlay-title="Power off monitors" { power-off-monitors; }
     Mod+Ctrl+Shift+Q hotkey-overlay-title="Exit niri session" { quit; }
 
@@ -72,16 +72,10 @@ binds {
     Mod+Alt+H            hotkey-overlay-title="System health" { spawn "dfr-launch-or-focus-tui" "monitor"; }
     Ctrl+Alt+T           hotkey-overlay-title="Terminal" { spawn "~/.config/bin/run_default" "terminal"; }
     Ctrl+Alt+Shift+T     hotkey-overlay-title="Terminal (floating)" { spawn "~/.config/bin/run_default" "terminal" "--class=dfr.floating.terminal"; }
-    Mod+E                hotkey-overlay-title="File manager" { spawn "~/.config/bin/run_default" "terminal" "-e" "yazi"; }
-    Mod+Shift+E          hotkey-overlay-title="File manager (floating)" { spawn "thunar" "--name=dfr.floating.thunar"; }
-    Mod+Alt+N            hotkey-overlay-title="Notes" { spawn "dfr-launch-or-focus-tui" "notes"; }
-    Mod+Alt+Shift+N      hotkey-overlay-title="Notes (directory)" { spawn-sh "dfr-launch-or-focus-tui ${EDITOR} ${NOTES_DIRECTORY}"; }
-    Mod+Alt+P            hotkey-overlay-title="Passwords" { spawn "dfr-launch-or-focus" "keepassxc"; }
-    Mod+Alt+Shift+P      hotkey-overlay-title="Generate random password to clipboard" { spawn "pw"; }
-    Mod+Alt+M            hotkey-overlay-title="Music" { spawn "dfr-launch-or-focus-tui" "rmpc"; }
+    Mod+E                hotkey-overlay-title="File manager" { spawn "~/.config/bin/run_default" "file-manager"; }
+    Mod+Shift+E          hotkey-overlay-title="File manager (floating)" { spawn "~/.config/bin/run_default" "file-manager" "--class=dfr.floating.terminal"; }
     Mod+Alt+B            hotkey-overlay-title="Browser" { spawn "~/.config/bin/run_default" "browser"; }
-    Mod+Alt+Shift+B      hotkey-overlay-title="Browser (private)" { spawn "firefox" "-private-window"; }
-    Mod+Alt+Ctrl+Shift+B hotkey-overlay-title="Browser (isolated profile)" { spawn-sh "firefox -P ${BROWSER_ISOLATED_PROFILE:-isolated}"; }
+    Mod+Alt+Shift+B      hotkey-overlay-title="Browser (private)" { spawn "~/.config/bin/run_default" "private-browser"; }
 
     // Display scaling (zoom) and mouse cursor lock.
     Mod+Ctrl+Shift+Equal hotkey-overlay-title="Increase focused monitor scale" { spawn "output-scale" "+"; }

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+cmd=("swayosd-client")
+if [[ -e "$HOME/.config/defaults" ]]; then
+	source ~/.config/defaults
+	if [[ -v MAIN_MONITOR ]]; then
+		cmd+=("--monitor" "$MAIN_MONITOR")
+	fi
+fi
+"${cmd[@]}" "$@"
