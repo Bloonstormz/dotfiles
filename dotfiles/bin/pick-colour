@@ -12,4 +12,8 @@ colour="$({
 	fi
 })"
 
-~/.config/bin/notification info "$0" "Colour: ${colour}"
+red=${colour:1:2}
+green=${colour:3:2}
+blue=${colour:5:2}
+
+~/.config/bin/notification info "$0" "Colour: ${colour} - $((16#$red)),$((16#$green)),$((16#$blue))"
