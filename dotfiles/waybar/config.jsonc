@@ -231,9 +231,9 @@
 	},
 
 	"mpris": {
-		"format": "{artist} - {title}",
+		"format": "{title}",
 		"tooltip-format": "{album}",
-		"format-paused": " {artist} - {title}",
+		"format-paused": " {title}",
 		"on-click": "playerctl play-pause",
 		"on-scroll-up": "playerctl previous",
 		"on-scroll-down": "playerctl next",
