@@ -6,11 +6,11 @@ run_link() {
 
 	case "${CFG_DISPLAY_THEME:-"Dark"}" in
 	Light)
-		ln -sf "./light.css" "$CONFIG/waybar/colours/colours.css"
+		soft_link -f "./light.css" "$CONFIG/waybar/colours/colours.css"
 		;;
 	*)
 		# Use catch-all so that if waybar theme is valid, it falls back to light
-		ln -sf "./dark.css" "$CONFIG/waybar/colours/colours.css"
+		soft_link -f "./dark.css" "$CONFIG/waybar/colours/colours.css"
 		;;
 	esac
 }

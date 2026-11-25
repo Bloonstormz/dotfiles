@@ -9,6 +9,18 @@ mapfile -t packages < <(
 	find "$DOTFILES_ROOT" -mindepth 1 -maxdepth 1 -type d | sort
 )
 
+DRY_RUN=false
+while [[ "$#" -gt 0 ]]; do
+	flag="$1"
+	shift
+
+	case "$flag" in
+	-d | --dry-run)
+		DRY_RUN=true
+		;;
+	esac
+done
+
 backup_conflict() {
 	local destination="$1"
 	local relative_destination="${destination#"$TARGET_HOME"/}"
@@ -30,6 +42,11 @@ confirm_conflict() {
 
 	while true; do
 		printf '%s already exists. (S)kip, (b)ackup or (r)eplace it? ' "$destination" >&2
+		if [[ "$DRY_RUN" == true ]]; then
+			printf "\n" >&2
+			echo "dry-run"
+			return
+		fi
 		read -r reply || true
 		case "${reply,,}" in
 		b | backup)
@@ -79,11 +96,18 @@ link() {
 		esac
 	fi
 
-	mkdir -p -- "$(dirname -- "$destination")"
 	relative_source="$(realpath --relative-to="$(dirname -- "$destination")" "$source")"
 	relative_wd="$(realpath --relative-to="$REPO_ROOT" "$source")"
-	ln -s -- "$relative_source" "$destination"
+	if [[ "$DRY_RUN" == false ]]; then
+		mkdir -p -- "$(dirname -- "$destination")"
+		ln -s -- "$relative_source" "$destination"
+	fi
 	printf 'Linked %s -> ./%s\n' "$destination" "$relative_wd"
+}
+soft_link() {
+	if [[ "$DRY_RUN" == false ]]; then
+		ln -s "$@"
+	fi
 }
 
 link_files() {
