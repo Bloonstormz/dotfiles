@@ -100,7 +100,7 @@ pick)
 		thumbnail_dir="$HOME/.cache/Wallpapers/thumbnails"
 		mkdir -p -- "$thumbnail_dir"
 		for wallpaper in "${WALLPAPER_PATHS[@]}"; do
-			path="$thumbnail_dir/$(basename "$wallpaper")"
+			path="$thumbnail_dir/$(basename "$wallpaper").jpg"
 			if ! [[ -e "$path" ]]; then
 				ffmpeg -i "$wallpaper" "-vf" "scale='if(gt(iw,ih),500,-1)':'if(gt(iw,ih),-1,500)'" \
 					-frames:v 1 -q:v 5 -update 1 "$path"
@@ -112,8 +112,12 @@ pick)
 	fi
 
 	chosen="$(pick_wallpaper)"
-	if [[ -e "$chosen" ]]; then
-		mapfile -t monitors < <(awww query -j | jaq -r '.""[].name')
+	if [[ -n "$chosen" ]]; then
+		if [[ -n "$NIRI_SOCKET" ]]; then
+			mapfile -t monitors < <(niri msg -j outputs | jaq -r '.[] | "\(.name) - \(.make) \(.model)"')
+		else
+			mapfile -t monitors < <(awww query -j | jaq -r '.""[].name')
+		fi
 		if [[ "${#monitors[@]}" -gt 1 ]]; then
 			target="$({
 				printf "%s\n" "${monitors[@]}"
@@ -123,7 +127,7 @@ pick)
 			if [[ "$target" == All ]]; then
 				awww img "$chosen"
 			else
-				awww img "$chosen" -o "$target"
+				awww img "$chosen" -o "${target%% *}"
 			fi
 		else
 			awww img "$chosen"
