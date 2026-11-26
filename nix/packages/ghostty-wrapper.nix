@@ -7,7 +7,10 @@ let
 in
 pkgs.symlinkJoin {
   name = "ghostty-nixgl";
-  paths = [ ghosttyWrapper ];
+  paths = [
+    ghosttyWrapper
+    pkgs.ghostty.terminfo
+  ];
   postBuild = ''
     mkdir -p $out/share/applications
     ln -s ${pkgs.ghostty}/share/applications/com.mitchellh.ghostty.desktop \
