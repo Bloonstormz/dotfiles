@@ -6,6 +6,17 @@ SCRIPT_DIR="$(realpath -- "$(dirname -- "${BASH_SOURCE[0]}")")"
 source "$SCRIPT_DIR/lib/colours.sh"
 source "$SCRIPT_DIR/lib/paths.sh"
 
+function print_help() {
+	echo "Flags:"
+	echo "    -c|--configure                         Always run configure.py before installing"
+	echo "    -n|--nix [(d)elete, (A)dd, (s)kip]     How to handle existing nix profiles"
+	echo "    -d|--dry-run                           Dry Run"
+	echo "    -u|--update-host                       Update host package database"
+	echo "    -H|--no-host                           Skip host package installations"
+	echo "    -N|--no-nix                            Skip nix profile installations"
+	echo "    -h|--help                              Print this help text"
+}
+
 CONFIGURE=false
 DRY_RUN=false
 UPDATE_HOST=false
@@ -34,6 +45,15 @@ while [[ "$#" -gt 0 ]]; do
 		;;
 	-N | --no-nix)
 		SKIP_NIX=true
+		;;
+	-h | --help)
+		print_help
+		exit 0
+		;;
+	*)
+		echo "Unrecognized option: $flag" >&2
+		print_help
+		exit 1
 		;;
 	esac
 done
