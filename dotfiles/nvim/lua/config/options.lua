@@ -27,4 +27,4 @@ else
   opt.shell = "bash"
 end
 
-opt.clipboard = "unnamed"
+opt.clipboard = {}
