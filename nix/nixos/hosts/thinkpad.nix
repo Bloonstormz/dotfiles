@@ -25,6 +25,10 @@
   hardware.bluetooth.enable = true;
 
   networking.hostName = "thinkpad";
+
+  console.keyMap = "gb";
+  console.useXkbConfig = true;
+
   boot = {
 
     loader.systemd-boot.enable = true;
