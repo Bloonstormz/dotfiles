@@ -13,3 +13,9 @@ wk.add({
   { "<S-Right>", "<C-O>e<Right>" },
   { "<C-Right>", "<C-O>E<Right>" },
 })
+
+wk.add({
+  mode = "n",
+  { "<C-e>", "<End>" },
+  { "<C-a>", "<Home>" },
+})
